@@ -78,7 +78,7 @@ export function CookieClicker() {
 		isPlaying,
 		lastActivityTime,
 		onInactivity: stopGame,
-		timeout: 500,
+		timeout: 800,
 	});
 
 	// Refetch leaderboard when transaction is confirmed
