@@ -63,7 +63,6 @@ export function CookieClicker() {
 		isPending,
 		isConfirming,
 		isConfirmed,
-		error,
 	} = contractData;
 
 	// Stop game callback
@@ -73,8 +72,6 @@ export function CookieClicker() {
 		const duration = getGameDuration();
 		const finalCookies = Math.floor(cookies);
 
-		console.log("finalCookies", finalCookies);
-		console.log("duration", duration);
 		await recordGameSession(finalCookies, duration);
 		resetGameState();
 	}, [
@@ -248,12 +245,6 @@ export function CookieClicker() {
 				currentUserUsername={getStoredUsername() || undefined}
 				formatNumber={formatNumber}
 			/>
-
-			{error && (
-				<Alert variant="destructive">
-					<AlertDescription>Error: {error.message}</AlertDescription>
-				</Alert>
-			)}
 
 			{isConfirmed && (
 				<Alert>

@@ -26,16 +26,6 @@ export const useSendCallsRequest = ({
 
 		const capabilities = request.params[0].capabilities;
 
-		console.log("chain.id", chain.id);
-		console.log(
-			"internal.config.paymaster?.transports[chain.id]",
-			internal.config.paymaster?.transports,
-		);
-		console.log(
-			"capabilities?.paymasterService?.url",
-			capabilities?.paymasterService?.url,
-		);
-
 		const hasPaymaster =
 			internal.config.paymaster?.transports[chain.id] !== undefined ||
 			capabilities?.paymasterService?.url !== undefined;

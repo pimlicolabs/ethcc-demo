@@ -19,7 +19,6 @@ export function DepositButton() {
 				toToken={getAddress("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")}
 				toAddress={recipientAddress || zeroAddress}
 				onPaymentCompleted={(result) => {
-					console.log("Payment completed:", result);
 					// Handle successful payment
 				}}
 			>

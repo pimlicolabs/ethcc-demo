@@ -136,9 +136,7 @@ export const Login = ({
 				},
 			});
 		} catch (error) {
-			console.error("Error creating credential:", error);
 			setError("Failed to create passkey. Please try again.");
-			// triggerShake()
 		} finally {
 			setIsLoading(null);
 		}

@@ -67,14 +67,12 @@ export function useContractInteractions(
 		async (cookies: number, duration: number) => {
 			if (!isConnected || !address) return;
 			if (!promptForUsername) {
-				console.error("Username prompt function not provided");
 				return;
 			}
 
 			try {
 				const username = await promptForUsername();
 				if (!username) {
-					console.log("Username not provided, transaction cancelled");
 					return;
 				}
 
