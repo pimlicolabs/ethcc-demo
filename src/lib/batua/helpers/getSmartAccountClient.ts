@@ -17,6 +17,7 @@ import {
 } from "viem/account-abstraction";
 import { getPaymasterClient } from "@/lib/batua/helpers/getPaymasterClient";
 import type { Internal } from "@/lib/batua/type";
+import { chainPollingIntervals } from "@/lib/batua/helpers/getBundlerClient";
 
 const clientCache = new Map<
 	string,
@@ -91,9 +92,17 @@ export const getSmartAccountClient = ({
 		account,
 		paymaster,
 		paymasterContext: config.paymaster?.context,
+		pollingInterval: chainPollingIntervals.get(chain.id) ?? 500,
 		userOperation: {
-			estimateFeesPerGas: async () =>
-				(await pimlicoClient.getUserOperationGasPrice()).fast,
+			estimateFeesPerGas: async () => {
+				if (config.boosted) {
+					return {
+						maxFeePerGas: BigInt(0),
+						maxPriorityFeePerGas: BigInt(0),
+					};
+				}
+				return (await pimlicoClient.getUserOperationGasPrice()).fast;
+			},
 		},
 	});
 	clientCache.set(key, client);

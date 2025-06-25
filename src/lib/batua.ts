@@ -32,6 +32,7 @@ const defaultConfig = {
 	},
 	implementation: local(),
 	priceManager: coingeckoPriceManager(),
+	boosted: false,
 } as const satisfies Config;
 
 export type Config<
@@ -54,6 +55,13 @@ export type Config<
 		transports: Record<chains[number]["id"], Transport>;
 	};
 	priceManager: PriceManager;
+	boosted:
+		| boolean
+		| {
+				callGasLimit: bigint;
+				verificationGasLimit: bigint;
+				preVerificationGas: bigint;
+		  };
 };
 
 export const Batua = {
@@ -77,6 +85,13 @@ export const Batua = {
 		dappName?: string;
 		walletName?: string;
 		priceManager?: PriceManager;
+		boosted?:
+			| boolean
+			| {
+					callGasLimit: bigint;
+					verificationGasLimit: bigint;
+					preVerificationGas: bigint;
+			  };
 	}) => {
 		const config: Config = {
 			storage: parameters?.storage ?? defaultConfig.storage,
@@ -90,6 +105,7 @@ export const Batua = {
 			dappName: parameters?.dappName ?? defaultConfig.dappName,
 			walletName: parameters?.walletName ?? defaultConfig.walletName,
 			priceManager: parameters?.priceManager ?? defaultConfig.priceManager,
+			boosted: parameters?.boosted ?? defaultConfig.boosted,
 		};
 
 		let implementation = config.implementation;

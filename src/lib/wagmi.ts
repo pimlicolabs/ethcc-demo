@@ -21,8 +21,13 @@ import { Batua } from "@/lib/batua";
 Batua.create({
 	// chains: [sepolia, baseSepolia, base],
 	chains: [arbitrumSepolia],
-	dappName: "ETHCC Demo",
+	dappName: "Pimlico",
 	walletName: "Batua",
+	boosted: {
+		callGasLimit: BigInt(1000000),
+		verificationGasLimit: BigInt(1000000),
+		preVerificationGas: BigInt(1000000),
+	},
 	rpc: {
 		transports: {
 			[arbitrumSepolia.id]: http("https://arbitrum-sepolia-rpc.publicnode.com"),
@@ -44,24 +49,24 @@ Batua.create({
 		},
 	},
 	// Optional: Add paymaster for sponsored transactions
-	...(process.env.NEXT_PUBLIC_PIMLICO_API_KEY && {
-		paymaster: {
-			transports: {
-				[arbitrumSepolia.id]: http(
-					`https://api.pimlico.io/v2/${arbitrumSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
-				),
-				// [baseSepolia.id]: http(
-				// 	`https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
-				// ),
-				// [base.id]: http(
-				// 	`https://api.pimlico.io/v2/${base.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
-				// ),
-			},
-			context: {
-				sponsorshipPolicyId: process.env.NEXT_PUBLIC_SPONSORSHIP_POLICY_ID,
-			},
-		},
-	}),
+	// ...(process.env.NEXT_PUBLIC_PIMLICO_API_KEY && {
+	// 	paymaster: {
+	// 		transports: {
+	// 			[arbitrumSepolia.id]: http(
+	// 				`https://api.pimlico.io/v2/${arbitrumSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
+	// 			),
+	// 			// [baseSepolia.id]: http(
+	// 			// 	`https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
+	// 			// ),
+	// 			// [base.id]: http(
+	// 			// 	`https://api.pimlico.io/v2/${base.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
+	// 			// ),
+	// 		},
+	// 		context: {
+	// 			sponsorshipPolicyId: process.env.NEXT_PUBLIC_SPONSORSHIP_POLICY_ID,
+	// 		},
+	// 	},
+	// }),
 });
 
 export const config = createConfig({

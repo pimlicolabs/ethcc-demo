@@ -84,7 +84,7 @@ export const useSmartAccount = ({
 			});
 			setSmartAccountClient(smartAccountClient);
 		});
-	}, [internal.store, accountAddress, capabilities]);
+	}, [internal, accountAddress, capabilities, client]);
 
 	return smartAccountClient;
 };

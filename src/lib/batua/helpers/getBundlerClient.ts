@@ -7,6 +7,15 @@ import type { Internal } from "@/lib/batua/type";
 
 const clientCache = new Map<string, BundlerClient<Transport, Chain>>();
 
+export const chainPollingIntervals = new Map<number, number>([
+	[42161, Math.floor(250 / 4)], // arbitrum
+	[11155111, Math.floor(12000 / 4)], // sepolia
+	[421614, Math.floor(300 / 4)], // arbitrumSepolia
+	[8453, Math.floor(2000 / 4)], // base
+	[84532, Math.floor(200 / 4)], // baseSepolia
+	[10, Math.floor(2000 / 4)], // optimism
+]);
+
 export const getBundlerClient = ({
 	internal,
 	chainId,
@@ -38,7 +47,7 @@ export const getBundlerClient = ({
 	const client = createBundlerClient({
 		chain,
 		transport: transport,
-		pollingInterval: 1_000,
+		pollingInterval: chainPollingIntervals.get(chain.id) ?? 500,
 	});
 	clientCache.set(key, client);
 	return client;

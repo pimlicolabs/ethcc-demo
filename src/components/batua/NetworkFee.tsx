@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-import { formatEther } from "viem";
 import { Badge } from "@/components/ui/badge";
 
 export const NetworkFee = ({
@@ -15,9 +14,10 @@ export const NetworkFee = ({
 	ethPrice: number;
 	dappName: string;
 }) => {
-	const gasCost = costInEther
-		? Number(costInEther * BigInt(ethPrice)) / (100 * 10 ** 18)
-		: null;
+	const gasCost =
+		costInEther !== null
+			? Number(costInEther * BigInt(ethPrice)) / (100 * 10 ** 18)
+			: null;
 
 	return (
 		<div className="flex flex-col w-full">
@@ -29,13 +29,13 @@ export const NetworkFee = ({
 						<div
 							className={`flex gap-2 justify-end ${hasPaymaster && gasCost ? "line-through" : ""} ${refreshingGasCost ? "text-muted-foreground" : ""}`}
 						>
-							{!gasCost && (
+							{gasCost === null ? (
 								<div className="flex justify-center items-center gap-2">
 									<Loader2 className="h-3 w-3 animate-spin" />
 									Calculating
 								</div>
-							)}
-							{hasPaymaster && gasCost && (
+							) : null}
+							{hasPaymaster && gasCost !== null ? (
 								<span className="tabular-nums">
 									{gasCost.toLocaleString("en-US", {
 										style: "currency",
@@ -43,9 +43,9 @@ export const NetworkFee = ({
 										maximumFractionDigits: 2,
 									})}
 								</span>
-							)}
+							) : null}
 
-							{!hasPaymaster && gasCost && (
+							{/* {!hasPaymaster && gasCost !== null ? (
 								<div
 									className={`flex flex-col justify-end ${refreshingGasCost ? "text-muted-foreground" : ""}`}
 								>
@@ -56,19 +56,20 @@ export const NetworkFee = ({
 											maximumFractionDigits: 2,
 										})}
 									</div>
-									{costInEther && (
+									{costInEther ? (
 										<div className="flex justify-end text-xs text-muted-foreground">
 											({Number(formatEther(costInEther)).toFixed(5)} ETH)
 										</div>
-									)}
+									) : null}
 								</div>
-							)}
+							) : null} */}
 						</div>
-						{hasPaymaster && (
-							<Badge variant="outline" className="flex justify-end">
-								Sponsored by {dappName}
-							</Badge>
-						)}
+						{hasPaymaster ||
+							(costInEther === BigInt(0) && (
+								<Badge variant="outline" className="flex justify-end">
+									Sponsored by {dappName}
+								</Badge>
+							))}
 					</div>
 				</div>
 			</div>

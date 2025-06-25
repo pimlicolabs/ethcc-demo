@@ -49,6 +49,7 @@ export const SendCalls = ({
 	const { userOperation, updating: refreshingGasCost } = useUserOperation({
 		smartAccountClient,
 		request,
+		boosted: internal.config.boosted,
 	});
 
 	// const decodedCallData = useDecodedCallData({
@@ -65,7 +66,9 @@ export const SendCalls = ({
 	const hasEnoughBalance = useMemo(
 		() =>
 			balance !== null && gasCost !== null
-				? hasPaymaster || balance > gasCost
+				? hasPaymaster ||
+					balance > gasCost ||
+					(balance === BigInt(0) && gasCost === BigInt(0))
 				: true,
 		[balance, gasCost, hasPaymaster],
 	);

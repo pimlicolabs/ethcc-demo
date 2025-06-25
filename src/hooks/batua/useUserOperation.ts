@@ -7,11 +7,19 @@ import type { KernelSmartAccount } from "@/hooks/batua/useSmartAccount";
 export const useUserOperation = ({
 	smartAccountClient,
 	request,
+	boosted,
 }: {
 	smartAccountClient: KernelSmartAccount | null;
 	request: RpcRequest.RpcRequest<
 		RpcSchema.ExtractItem<RpcSchema.Default, "wallet_sendCalls">
 	>;
+	boosted:
+		| boolean
+		| {
+				callGasLimit: bigint;
+				verificationGasLimit: bigint;
+				preVerificationGas: bigint;
+		  };
 }) => {
 	const [userOperation, setUserOperation] =
 		useState<UserOperation<"0.7"> | null>(null);
@@ -37,6 +45,13 @@ export const useUserOperation = ({
 						balance: parseEther("100"),
 					},
 				],
+				...(typeof boosted === "object"
+					? {
+							callGasLimit: boosted.callGasLimit,
+							verificationGasLimit: boosted.verificationGasLimit,
+							preVerificationGas: boosted.preVerificationGas,
+						}
+					: {}),
 			});
 			setUserOperation(userOperation);
 			setUpdating(false);
@@ -49,7 +64,7 @@ export const useUserOperation = ({
 		}, 20_000); // updates every 20 seconds
 
 		return () => clearInterval(interval);
-	}, [smartAccountClient, request]);
+	}, [smartAccountClient, request, boosted]);
 
 	return { userOperation, updating };
 };
