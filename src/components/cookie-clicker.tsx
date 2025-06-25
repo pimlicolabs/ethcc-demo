@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Trophy } from "lucide-react";
 import { useGameState } from "@/hooks/use-game-state";
 import { useContractInteractions } from "@/hooks/use-contract-interactions";
 import { useLeaderboard } from "@/hooks/use-leaderboard";
@@ -15,6 +17,15 @@ import { UsernamePrompt } from "@/components/username-prompt";
 import { getStoredUsername } from "@/lib/username";
 
 export function CookieClicker() {
+	// State for first-time user instructions
+	const [showInstructions, setShowInstructions] = useState(() => {
+		// Check if user has seen instructions before
+		if (typeof window !== "undefined") {
+			return !localStorage.getItem("cookieClickerInstructionsSeen");
+		}
+		return true;
+	});
+
 	// Custom hooks
 	const gameState = useGameState();
 	const usernamePrompt = useUsernamePrompt();
@@ -92,6 +103,74 @@ export function CookieClicker() {
 	const handleCookieClick = useCallback(() => {
 		clickCookie(bestScore);
 	}, [clickCookie, bestScore]);
+
+	// Handle starting the game
+	const handleStartGame = () => {
+		setShowInstructions(false);
+		if (typeof window !== "undefined") {
+			localStorage.setItem("cookieClickerInstructionsSeen", "true");
+		}
+	};
+
+	// Show instructions screen for first-time users
+	if (showInstructions) {
+		return (
+			<div className="w-full max-w-2xl mx-auto p-4 min-h-screen flex items-center justify-center">
+				<Card className="p-8 max-w-md w-full animate-in fade-in slide-in-from-bottom-4">
+					<div className="space-y-6 text-center">
+						<div className="space-y-2">
+							<div className="text-6xl mb-4">🍪</div>
+							<h1 className="text-3xl font-bold">Cookie Click</h1>
+							<p className="text-muted-foreground">
+								powered by Batua & Pimlico
+							</p>
+						</div>
+
+						<div className="space-y-4">
+							<h2 className="text-xl font-semibold flex items-center justify-center gap-2">
+								<Trophy className="w-5 h-5 text-primary" />
+								How to Play
+							</h2>
+							<div className="space-y-3 text-left text-muted-foreground">
+								<div className="flex gap-3">
+									<span className="text-2xl">🍪</span>
+									<p>
+										<strong>Tap the cookie</strong> as fast as you can to earn
+										points!
+									</p>
+								</div>
+								<div className="flex gap-3">
+									<span className="text-2xl">⏱️</span>
+									<p>
+										<strong>Keep tapping</strong> - if you stop for more than
+										0.8 seconds, your session ends automatically.
+									</p>
+								</div>
+								<div className="flex gap-3">
+									<span className="text-2xl">🏆</span>
+									<p>
+										<strong>Climb the leaderboard</strong> by tapping for as
+										long as possible and beating other players' scores!
+									</p>
+								</div>
+								<p className="text-sm text-center pt-2 text-primary">
+									Your score is saved on the blockchain when your session ends.
+								</p>
+							</div>
+						</div>
+
+						<Button
+							onClick={handleStartGame}
+							size="lg"
+							className="w-full text-lg py-6"
+						>
+							Play Now
+						</Button>
+					</div>
+				</Card>
+			</div>
+		);
+	}
 
 	return (
 		<div className="w-full max-w-2xl mx-auto p-4 space-y-6 pt-12 relative">
