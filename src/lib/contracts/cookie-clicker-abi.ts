@@ -2,7 +2,7 @@ import { arbitrumSepolia, sepolia } from "viem/chains";
 
 export const COOKIE_CLICKER_ADDRESS = {
 	[sepolia.id]: "0x35F280c2233d64be5BCfAf3A9F3A4273829b1722",
-	[arbitrumSepolia.id]: "0x81ac512c936A4Dca953bFCBF8d9036fBc6e03ADA",
+	[arbitrumSepolia.id]: "0xD943E4E1f51cDD3dD389361a22a309fd2bfd9454",
 } as const;
 
 export const COOKIE_CLICKER_ABI = [
@@ -89,6 +89,25 @@ export const COOKIE_CLICKER_ABI = [
 		name: "recordGameSession",
 		outputs: [],
 		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		name: "allPlayers",
+		outputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+		],
+		stateMutability: "view",
 		type: "function",
 	},
 	{
@@ -238,12 +257,77 @@ export const COOKIE_CLICKER_ABI = [
 	},
 	{
 		inputs: [],
+		name: "getTop10GameSessions",
+		outputs: [
+			{
+				internalType: "address[10]",
+				name: "players",
+				type: "address[10]",
+			},
+			{
+				internalType: "uint256[10]",
+				name: "cookies",
+				type: "uint256[10]",
+			},
+			{
+				internalType: "uint256[10]",
+				name: "timestamps",
+				type: "uint256[10]",
+			},
+			{
+				internalType: "uint256[10]",
+				name: "durations",
+				type: "uint256[10]",
+			},
+			{
+				internalType: "string[10]",
+				name: "usernames",
+				type: "string[10]",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [],
 		name: "getTotalCookiesClicked",
 		outputs: [
 			{
 				internalType: "uint256",
 				name: "",
 				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [],
+		name: "getTotalPlayerCount",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+		],
+		name: "isPlayerTracked",
+		outputs: [
+			{
+				internalType: "bool",
+				name: "",
+				type: "bool",
 			},
 		],
 		stateMutability: "view",

@@ -19,6 +19,12 @@ contract CookieClicker {
     // Mapping from player address to their best score
     mapping(address => uint256) public bestScores;
     
+    // Array to track all players who have played
+    address[] public allPlayers;
+    
+    // Mapping to check if a player has been added to allPlayers array
+    mapping(address => bool) public isPlayerTracked;
+    
     // Total number of cookies clicked across all players
     uint256 public totalCookiesClicked;
     
@@ -59,6 +65,12 @@ contract CookieClicker {
         
         // Add to player's sessions
         playerSessions[msg.sender].push(newSession);
+        
+        // Track new players
+        if (!isPlayerTracked[msg.sender]) {
+            allPlayers.push(msg.sender);
+            isPlayerTracked[msg.sender] = true;
+        }
         
         // Update total cookies clicked
         totalCookiesClicked += cookies;
@@ -158,5 +170,91 @@ contract CookieClicker {
         uint256 latestIndex = playerSessions[player].length - 1;
         GameSession memory session = playerSessions[player][latestIndex];
         return (session.cookies, session.timestamp, session.duration, session.username);
+    }
+    
+    /**
+     * @dev Get the top 10 game sessions sorted by cookie count (highest first)
+     * Uses a more efficient approach by only tracking best scores per player
+     * @return players Array of player addresses
+     * @return cookies Array of cookie counts
+     * @return timestamps Array of session timestamps
+     * @return durations Array of session durations
+     * @return usernames Array of usernames
+     */
+    function getTop10GameSessions() 
+        external 
+        view 
+        returns (
+            address[10] memory players,
+            uint256[10] memory cookies,
+            uint256[10] memory timestamps,
+            uint256[10] memory durations,
+            string[10] memory usernames
+        ) 
+    {
+        require(allPlayers.length > 0, "No players found");
+        
+        // Create temporary arrays for sorting
+        uint256 playerCount = allPlayers.length;
+        uint256[] memory bestScoresList = new uint256[](playerCount);
+        uint256[] memory playerIndices = new uint256[](playerCount);
+        
+        // Get best scores for all players
+        for (uint256 i = 0; i < playerCount; i++) {
+            bestScoresList[i] = bestScores[allPlayers[i]];
+            playerIndices[i] = i;
+        }
+        
+        // Sort by best scores (descending) - simple bubble sort for small datasets
+        for (uint256 i = 0; i < playerCount - 1; i++) {
+            for (uint256 j = 0; j < playerCount - i - 1; j++) {
+                if (bestScoresList[j] < bestScoresList[j + 1]) {
+                    // Swap scores
+                    uint256 tempScore = bestScoresList[j];
+                    bestScoresList[j] = bestScoresList[j + 1];
+                    bestScoresList[j + 1] = tempScore;
+                    
+                    // Swap player indices
+                    uint256 tempIndex = playerIndices[j];
+                    playerIndices[j] = playerIndices[j + 1];
+                    playerIndices[j + 1] = tempIndex;
+                }
+            }
+        }
+        
+        // Fill return arrays with top 10 players' best sessions
+        uint256 returnCount = playerCount < 10 ? playerCount : 10;
+        
+        for (uint256 i = 0; i < returnCount; i++) {
+            address player = allPlayers[playerIndices[i]];
+            players[i] = player;
+            
+            // Find the best session for this player
+            uint256 bestCookies = 0;
+            uint256 bestSessionIndex = 0;
+            
+            for (uint256 j = 0; j < playerSessions[player].length; j++) {
+                if (playerSessions[player][j].cookies > bestCookies) {
+                    bestCookies = playerSessions[player][j].cookies;
+                    bestSessionIndex = j;
+                }
+            }
+            
+            GameSession memory bestSession = playerSessions[player][bestSessionIndex];
+            cookies[i] = bestSession.cookies;
+            timestamps[i] = bestSession.timestamp;
+            durations[i] = bestSession.duration;
+            usernames[i] = bestSession.username;
+        }
+        
+        return (players, cookies, timestamps, durations, usernames);
+    }
+    
+    /**
+     * @dev Get the total number of players who have played
+     * @return The total number of unique players
+     */
+    function getTotalPlayerCount() external view returns (uint256) {
+        return allPlayers.length;
     }
 }
