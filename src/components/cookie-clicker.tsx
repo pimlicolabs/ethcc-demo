@@ -245,14 +245,6 @@ export function CookieClicker() {
 				currentUserUsername={getStoredUsername() || undefined}
 				formatNumber={formatNumber}
 			/>
-
-			{isConfirmed && (
-				<Alert>
-					<AlertDescription>
-						Score saved successfully! Transaction confirmed.
-					</AlertDescription>
-				</Alert>
-			)}
 		</div>
 	);
 }
