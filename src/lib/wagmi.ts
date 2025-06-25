@@ -25,7 +25,7 @@ Batua.create({
 	walletName: "Batua",
 	boosted: {
 		callGasLimit: BigInt(150_000),
-		verificationGasLimit: BigInt(500_000),
+		verificationGasLimit: BigInt(1_000_000),
 		preVerificationGas: BigInt(0),
 	},
 	rpc: {
