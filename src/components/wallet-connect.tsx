@@ -1,5 +1,6 @@
 "use client";
 
+import { Wallet } from "lucide-react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { Button } from "./ui/button";
 
@@ -12,7 +13,7 @@ export function WalletConnect() {
 		return (
 			<div className="flex flex-col items-center gap-6 p-6">
 				<div className="text-center">
-					<div className="text-lg font-semibold text-green-600 mb-2">
+					<div className="text-lg font-semibold text-primary mb-2">
 						✓ Connected
 					</div>
 					<div className="text-sm text-muted-foreground break-all px-2">
@@ -36,32 +37,28 @@ export function WalletConnect() {
 	);
 
 	return (
-		<div className="flex flex-col items-center gap-6 p-6">
-			<div className="text-center">
-				<h2 className="text-xl sm:text-2xl font-bold mb-2">
-					Connect with Batua
-				</h2>
-				<p className="text-sm text-muted-foreground">
-					Smart account with passkey authentication
-				</p>
-			</div>
+		<div className="flex flex-col items-center gap-4 p-6">
 			<div className="w-full max-w-xs">
 				{batuaConnector ? (
 					<Button
 						onClick={() => connect({ connector: batuaConnector })}
-						className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-base font-medium"
+						className="w-full h-12 bg-primary hover:bg-primary/90 text-base font-medium"
 					>
-						🔐 Connect Batua Wallet
+						<Wallet className="w-5 h-5 mr-2" />
+						Connect Wallet
 					</Button>
 				) : (
-					<div className="text-center text-muted-foreground p-4 border border-dashed border-gray-300 rounded-lg">
-						<p className="mb-2 text-sm">Batua wallet not detected</p>
-						<p className="text-xs opacity-75">
-							Please ensure Batua is properly configured
+					<div className="text-center text-muted-foreground p-4 border border-dashed border-muted rounded-lg">
+						<p className="text-sm">Wallet not detected</p>
+						<p className="text-xs opacity-75 mt-1">
+							Please check your configuration
 						</p>
 					</div>
 				)}
 			</div>
+			<p className="text-xs text-muted-foreground text-center">
+				Secured with passkey authentication
+			</p>
 		</div>
 	);
 }

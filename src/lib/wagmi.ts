@@ -1,5 +1,18 @@
 import { createConfig, http } from "wagmi";
-import { base, baseSepolia, mainnet, sepolia } from "wagmi/chains";
+import {
+	arbitrum,
+	base,
+	baseSepolia,
+	bsc,
+	celo,
+	linea,
+	mainnet,
+	mantle,
+	optimism,
+	polygon,
+	sepolia,
+	worldchain,
+} from "wagmi/chains";
 import { injected, metaMask, walletConnect } from "wagmi/connectors";
 import { Batua } from "@/lib/batua";
 
@@ -50,14 +63,35 @@ Batua.create({
 });
 
 export const config = createConfig({
-	chains: [mainnet, sepolia, baseSepolia, base],
+	chains: [
+		mainnet,
+		base,
+		polygon,
+		optimism,
+		arbitrum,
+		linea,
+		bsc,
+		sepolia,
+		baseSepolia,
+		worldchain,
+		mantle,
+		celo,
+	],
 	ssr: true,
 	connectors: [injected()],
 	transports: {
 		[mainnet.id]: http(),
+		[base.id]: http(),
+		[polygon.id]: http(),
+		[optimism.id]: http(),
+		[arbitrum.id]: http(),
+		[linea.id]: http(),
+		[bsc.id]: http(),
 		[sepolia.id]: http(),
 		[baseSepolia.id]: http(),
-		[base.id]: http(),
+		[worldchain.id]: http(),
+		[mantle.id]: http(),
+		[celo.id]: http(),
 	},
 });
 

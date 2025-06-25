@@ -39,6 +39,19 @@
 - TypeScript compilation included
 - Tailwind CSS processing via PostCSS
 
+## Code Modification Restrictions
+
+- **CRITICAL - DO NOT MODIFY BATUA CODE**: Never change or edit any code under
+  the following paths:
+  - `@/lib/batua/` - Core batua library directory and all subdirectories
+  - `@/lib/batua.ts` - Main batua configuration file
+  - `src/lib/batua/` - Alternative reference to batua library
+  - `src/lib/batua.ts` - Alternative reference to batua config file
+- **READ-ONLY**: These files are core infrastructure and should be treated as
+  read-only
+- **NO EXCEPTIONS**: Do not modify, refactor, or "improve" any batua-related
+  code
+
 ## Development Workflow
 
 - **ALWAYS LINT AFTER MAKING CHANGES**: Run `pnpm biome check --write` after any
@@ -63,6 +76,29 @@
   p-6, gap-4, etc.)
 - **CRITICAL**: Never create desktop-first designs - always start with mobile
   and scale up
+
+## UI Component Guidelines
+
+- **MANDATORY - USE SHADCN/UI COMPONENTS**: ALWAYS use shadcn/ui components for ALL UI elements
+  - Use Button component from shadcn/ui instead of plain HTML buttons
+  - Use Card, Dialog, Alert, and other shadcn/ui components
+  - Import components from "@/components/ui/*"
+- **COLOR SYSTEM**: NEVER hardcode colors - ALWAYS use shadcn/ui semantic color tokens:
+  - Use `primary`, `secondary`, `destructive`, `muted`, `accent` color variants
+  - Use `foreground`, `background`, `border`, `ring` for standard elements
+  - Example: `text-primary`, `bg-secondary`, `border-muted-foreground`
+  - NEVER use hardcoded colors like `gray-950`, `white`, `black`, etc.
+- **STYLING CONSISTENCY**: Follow shadcn/ui patterns and conventions throughout the codebase
+- **COMPONENT VARIANTS**: Use appropriate shadcn/ui component variants (default, outline, ghost, etc.)
+
+## Component Structure Guidelines
+
+- **ONE COMPONENT PER FILE**: Each React component must be in its own file
+- **Component Organization**: Place all components in `src/components/`
+- **File Naming**: Use kebab-case for component files (e.g., `deposit-button.tsx`)
+- **Export Convention**: Use named exports for components
+- **Component Isolation**: Each component should be self-contained with its own imports
+- **NO MULTIPLE COMPONENTS**: Never define multiple components in a single file
 
 ## Notes
 
