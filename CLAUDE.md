@@ -15,7 +15,7 @@
   - Version: 2.0.5
   - Features: Linting, formatting, import sorting
   - Configuration: biome.json
-  - Commands: `pnpm biome check`, `pnpm biome format`, `pnpm biome lint`
+  - Commands: `pnpm format`, `pnpm check`
 - **PostCSS** - CSS processing
 - **Turbopack** - Fast bundler for development (optional)
 
@@ -54,8 +54,8 @@
 
 ## Development Workflow
 
-- **ALWAYS LINT AFTER MAKING CHANGES**: Run `pnpm biome check --write` after any
-  code modifications
+- **ALWAYS LINT AFTER MAKING CHANGES**: Run `pnpm format` after any code
+  modifications
 - **Code Quality**: Biome handles formatting, linting, and import sorting
   automatically
 - **Pre-commit**: Ensure all files pass linting before committing changes
@@ -79,25 +79,31 @@
 
 ## UI Component Guidelines
 
-- **MANDATORY - USE SHADCN/UI COMPONENTS**: ALWAYS use shadcn/ui components for ALL UI elements
+- **MANDATORY - USE SHADCN/UI COMPONENTS**: ALWAYS use shadcn/ui components for
+  ALL UI elements
   - Use Button component from shadcn/ui instead of plain HTML buttons
   - Use Card, Dialog, Alert, and other shadcn/ui components
   - Import components from "@/components/ui/*"
-- **COLOR SYSTEM**: NEVER hardcode colors - ALWAYS use shadcn/ui semantic color tokens:
+- **COLOR SYSTEM**: NEVER hardcode colors - ALWAYS use shadcn/ui semantic color
+  tokens:
   - Use `primary`, `secondary`, `destructive`, `muted`, `accent` color variants
   - Use `foreground`, `background`, `border`, `ring` for standard elements
   - Example: `text-primary`, `bg-secondary`, `border-muted-foreground`
   - NEVER use hardcoded colors like `gray-950`, `white`, `black`, etc.
-- **STYLING CONSISTENCY**: Follow shadcn/ui patterns and conventions throughout the codebase
-- **COMPONENT VARIANTS**: Use appropriate shadcn/ui component variants (default, outline, ghost, etc.)
+- **STYLING CONSISTENCY**: Follow shadcn/ui patterns and conventions throughout
+  the codebase
+- **COMPONENT VARIANTS**: Use appropriate shadcn/ui component variants (default,
+  outline, ghost, etc.)
 
 ## Component Structure Guidelines
 
 - **ONE COMPONENT PER FILE**: Each React component must be in its own file
 - **Component Organization**: Place all components in `src/components/`
-- **File Naming**: Use kebab-case for component files (e.g., `deposit-button.tsx`)
+- **File Naming**: Use kebab-case for component files (e.g.,
+  `deposit-button.tsx`)
 - **Export Convention**: Use named exports for components
-- **Component Isolation**: Each component should be self-contained with its own imports
+- **Component Isolation**: Each component should be self-contained with its own
+  imports
 - **NO MULTIPLE COMPONENTS**: Never define multiple components in a single file
 
 ## Notes

@@ -45,7 +45,7 @@ export function WalletConnect() {
 						className="w-full h-12 bg-primary hover:bg-primary/90 text-base font-medium"
 					>
 						<Wallet className="w-5 h-5 mr-2" />
-						Connect Wallet
+						Login
 					</Button>
 				) : (
 					<div className="text-center text-muted-foreground p-4 border border-dashed border-muted rounded-lg">

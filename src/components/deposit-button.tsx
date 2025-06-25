@@ -2,9 +2,9 @@
 
 import { DaimoPayButton } from "@daimo/pay";
 import { getAddress, zeroAddress } from "viem";
+import { base } from "viem/chains";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
-import { base } from "viem/chains";
 
 export function DepositButton() {
 	const { address: recipientAddress } = useAccount();

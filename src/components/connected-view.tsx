@@ -1,9 +1,13 @@
-import { DepositButton } from "@/components/deposit-button";
-import { Card } from "@/components/ui/card";
+// import { DepositButton } from "@/components/deposit-button";
+import { CookieClicker } from "@/components/cookie-clicker";
+// import { Card } from "@/components/ui/card";
 
 export function ConnectedView() {
 	return (
 		<div className="mx-auto w-full max-w-md">
+			<CookieClicker />
+			{/* Deposit flow temporarily commented out */}
+			{/* 
 			<div className="text-center">
 				<h2 className="text-xl sm:text-2xl font-semibold mb-4">
 					Ready to Play?
@@ -16,6 +20,7 @@ export function ConnectedView() {
 					<DepositButton />
 				</Card>
 			</div>
+			*/}
 		</div>
 	);
 }
