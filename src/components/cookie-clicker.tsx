@@ -193,13 +193,15 @@ export function CookieClicker() {
 
 	// Auto-increment cookies based on CPS
 	useEffect(() => {
-		if (cookiesPerSecond > 0 && isPlaying) {
-			const interval = setInterval(() => {
-				setCookies((prev) => prev + cookiesPerSecond / 10);
-			}, 100);
-			return () => clearInterval(interval);
-		}
-	}, [cookiesPerSecond, isPlaying]);
+		if (!lastActivityTime) return;
+		const interval = setInterval(() => {
+			const now = Date.now();
+			const elapsedSeconds = (now - lastActivityTime) / 1000;
+
+			setCookiesPerSecond(Number((cookies / elapsedSeconds).toFixed(1)));
+		}, 100);
+		return () => clearInterval(interval);
+	}, [cookies, lastActivityTime]);
 
 	// Calculate total CPS whenever upgrades change
 	useEffect(() => {
