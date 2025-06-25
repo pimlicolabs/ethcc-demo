@@ -18,16 +18,16 @@ export function LoadingOverlay({
 
 	return (
 		<div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-			<Card className="p-6 w-10/12">
+			<Card className="p-6 w-10/12 max-w-sm">
 				<div className="flex flex-col items-center space-y-4">
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
 					<div className="text-center">
 						<p className="font-semibold">
 							{isPending ? "Submitting Score..." : "Confirming Transaction..."}
 						</p>
-						<p className="text-sm text-muted-foreground mt-1">
+						{/* <p className="text-sm text-muted-foreground mt-1">
 							Recording {formatNumber(Math.floor(cookies))} cookies
-						</p>
+						</p> */}
 					</div>
 				</div>
 			</Card>
