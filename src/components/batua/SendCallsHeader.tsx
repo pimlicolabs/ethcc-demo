@@ -26,7 +26,7 @@ export const SendCallsHeader = ({
 	// }, [])
 
 	return (
-		<div className="bg-muted/10 rounded-t-lg mb-4">
+		<div className="rounded-t-lg mb-4">
 			<DialogHeader className="gap-0 border-b pb-2">
 				<div>
 					<DialogTitle className="text-xl font-semibold flex items-center justify-start">

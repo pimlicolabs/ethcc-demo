@@ -2,7 +2,7 @@ import { arbitrumSepolia, sepolia } from "viem/chains";
 
 export const COOKIE_CLICKER_ADDRESS = {
 	[sepolia.id]: "0x35F280c2233d64be5BCfAf3A9F3A4273829b1722",
-	[arbitrumSepolia.id]: "0x2f9D5499951BCB1D1d128c5EBD27Ce7130c11149",
+	[arbitrumSepolia.id]: "0x81ac512c936A4Dca953bFCBF8d9036fBc6e03ADA",
 } as const;
 
 export const COOKIE_CLICKER_ABI = [
@@ -14,6 +14,12 @@ export const COOKIE_CLICKER_ABI = [
 				internalType: "address",
 				name: "player",
 				type: "address",
+			},
+			{
+				indexed: false,
+				internalType: "string",
+				name: "username",
+				type: "string",
 			},
 			{
 				indexed: false,
@@ -63,76 +69,22 @@ export const COOKIE_CLICKER_ABI = [
 		type: "event",
 	},
 	{
-		inputs: [{ internalType: "address", name: "", type: "address" }],
-		name: "bestScores",
-		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [{ internalType: "address", name: "player", type: "address" }],
-		name: "getLatestPlayerSession",
-		outputs: [
-			{ internalType: "uint256", name: "cookies", type: "uint256" },
-			{ internalType: "uint256", name: "timestamp", type: "uint256" },
-			{ internalType: "uint256", name: "duration", type: "uint256" },
-		],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [{ internalType: "address", name: "player", type: "address" }],
-		name: "getPlayerBestScore",
-		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
 		inputs: [
-			{ internalType: "address", name: "player", type: "address" },
-			{ internalType: "uint256", name: "sessionIndex", type: "uint256" },
-		],
-		name: "getPlayerSession",
-		outputs: [
-			{ internalType: "uint256", name: "cookies", type: "uint256" },
-			{ internalType: "uint256", name: "timestamp", type: "uint256" },
-			{ internalType: "uint256", name: "duration", type: "uint256" },
-		],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [{ internalType: "address", name: "player", type: "address" }],
-		name: "getPlayerSessionCount",
-		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [],
-		name: "getTotalCookiesClicked",
-		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [
-			{ internalType: "address", name: "", type: "address" },
-			{ internalType: "uint256", name: "", type: "uint256" },
-		],
-		name: "playerSessions",
-		outputs: [
-			{ internalType: "uint256", name: "cookies", type: "uint256" },
-			{ internalType: "uint256", name: "timestamp", type: "uint256" },
-			{ internalType: "uint256", name: "duration", type: "uint256" },
-		],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [
-			{ internalType: "uint256", name: "cookies", type: "uint256" },
-			{ internalType: "uint256", name: "duration", type: "uint256" },
+			{
+				internalType: "uint256",
+				name: "cookies",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "duration",
+				type: "uint256",
+			},
+			{
+				internalType: "string",
+				name: "username",
+				type: "string",
+			},
 		],
 		name: "recordGameSession",
 		outputs: [],
@@ -140,9 +92,212 @@ export const COOKIE_CLICKER_ABI = [
 		type: "function",
 	},
 	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+		],
+		name: "bestScores",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+		],
+		name: "getLatestPlayerSession",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "cookies",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "timestamp",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "duration",
+				type: "uint256",
+			},
+			{
+				internalType: "string",
+				name: "username",
+				type: "string",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+		],
+		name: "getPlayerBestScore",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "cookies",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "timestamp",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "duration",
+				type: "uint256",
+			},
+			{
+				internalType: "string",
+				name: "username",
+				type: "string",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+			{
+				internalType: "uint256",
+				name: "sessionIndex",
+				type: "uint256",
+			},
+		],
+		name: "getPlayerSession",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "cookies",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "timestamp",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "duration",
+				type: "uint256",
+			},
+			{
+				internalType: "string",
+				name: "username",
+				type: "string",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+		],
+		name: "getPlayerSessionCount",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [],
+		name: "getTotalCookiesClicked",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		name: "playerSessions",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "cookies",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "timestamp",
+				type: "uint256",
+			},
+			{
+				internalType: "uint256",
+				name: "duration",
+				type: "uint256",
+			},
+			{
+				internalType: "string",
+				name: "username",
+				type: "string",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
 		inputs: [],
 		name: "totalCookiesClicked",
-		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
 		stateMutability: "view",
 		type: "function",
 	},
