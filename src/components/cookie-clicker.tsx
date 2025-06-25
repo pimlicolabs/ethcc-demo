@@ -26,6 +26,9 @@ export function CookieClicker() {
 		return true;
 	});
 
+	// State for showing "Try again" tooltip
+	const [showTryAgain, setShowTryAgain] = useState(false);
+
 	// Custom hooks
 	const gameState = useGameState();
 	const usernamePrompt = useUsernamePrompt();
@@ -92,12 +95,23 @@ export function CookieClicker() {
 		timeout: 800,
 	});
 
-	// Refetch leaderboard when transaction is confirmed
+	// Refetch leaderboard when transaction is confirmed and show "Try again" tooltip
 	useEffect(() => {
 		if (isConfirmed) {
 			refetchLeaderboard();
+			// Show "Try again" tooltip after 1 second
+			setTimeout(() => {
+				setShowTryAgain(true);
+			}, 1000);
 		}
 	}, [isConfirmed, refetchLeaderboard]);
+
+	// Hide "Try again" tooltip when user starts playing again
+	useEffect(() => {
+		if (isPlaying) {
+			setShowTryAgain(false);
+		}
+	}, [isPlaying]);
 
 	// Handle cookie click with best score
 	const handleCookieClick = useCallback(() => {
@@ -199,7 +213,7 @@ export function CookieClicker() {
 				</div>
 			</div>
 
-			<div className="flex justify-center">
+			<div className="flex justify-center relative">
 				<Button
 					onClick={handleCookieClick}
 					size="lg"
@@ -208,6 +222,14 @@ export function CookieClicker() {
 				>
 					🍪
 				</Button>
+				{showTryAgain && (
+					<div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium animate-in fade-in slide-in-from-bottom-2">
+						Try again!
+						<div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
+							<div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-primary" />
+						</div>
+					</div>
+				)}
 			</div>
 
 			<GameStats
