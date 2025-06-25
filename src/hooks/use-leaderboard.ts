@@ -74,7 +74,7 @@ export function useLeaderboard() {
 							address: COOKIE_CLICKER_ADDRESS[chainId],
 							abi: COOKIE_CLICKER_ABI,
 							functionName: "getPlayerBestScore",
-							args: [entry.address],
+							args: [entry.address as `0x${string}`],
 						});
 						return {
 							...entry,
@@ -140,7 +140,7 @@ export function useLeaderboard() {
 								address: COOKIE_CLICKER_ADDRESS[chainId],
 								abi: COOKIE_CLICKER_ABI,
 								functionName: "getPlayerBestScore",
-								args: [entry.address],
+								args: [entry.address as `0x${string}`],
 							});
 							return {
 								...entry,
