@@ -24,9 +24,9 @@ Batua.create({
 	dappName: "Pimlico",
 	walletName: "Batua",
 	boosted: {
-		callGasLimit: BigInt(1000000),
-		verificationGasLimit: BigInt(1000000),
-		preVerificationGas: BigInt(1000000),
+		callGasLimit: BigInt(150_000),
+		verificationGasLimit: BigInt(500_000),
+		preVerificationGas: BigInt(0),
 	},
 	rpc: {
 		transports: {
