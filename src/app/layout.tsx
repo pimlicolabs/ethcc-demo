@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Cookie Click - Powered by Batua & Pimlico",
+	title: "Cookie Clicker - Powered by Batua & Pimlico",
 	description:
 		"A fun cookie clicking game demonstrating Web3 capabilities with Batua wallet integration and Pimlico infrastructure",
 	icons: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 		apple: "/favicon.png",
 	},
 	openGraph: {
-		title: "Cookie Click - Powered by Batua & Pimlico",
+		title: "Cookie Clicker - Powered by Batua & Pimlico",
 		description:
 			"A fun cookie clicking game demonstrating Web3 capabilities with Batua wallet integration and Pimlico infrastructure",
 		images: [
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Cookie Click - Powered by Batua & Pimlico",
+		title: "Cookie Clicker - Powered by Batua & Pimlico",
 		description:
 			"A fun cookie clicking game demonstrating Web3 capabilities with Batua wallet integration and Pimlico infrastructure",
 		images: ["/api/og"],
