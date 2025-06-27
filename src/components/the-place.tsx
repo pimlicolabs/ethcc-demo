@@ -332,7 +332,7 @@ export function ThePlace() {
 			<div className="w-full max-w-md mx-auto space-y-6">
 				<div className="text-center">
 					<p className="text-sm text-muted-foreground">
-						Add your company logo to a random spot on the collaborative canvas
+						Become part of ETHCC Canvas
 					</p>
 				</div>
 
@@ -351,7 +351,7 @@ export function ThePlace() {
 								htmlFor={companyUrlId}
 								className="text-sm font-medium mb-2 block"
 							>
-								Company URL
+								Your company
 							</label>
 							<Input
 								id={companyUrlId}
@@ -394,10 +394,8 @@ export function ThePlace() {
 								"🎉 Canvas Full!"
 							) : (
 								<>
-									<Plus className="w-4 h-4 mr-2" />
-									{isConnected
-										? "Add Logo to Random Position"
-										: "Connect Wallet First"}
+									{/* <Plus className="w-4 h-4 mr-2" /> */}
+									{isConnected ? "Submit" : "Connect Wallet First"}
 								</>
 							)}
 						</Button>
