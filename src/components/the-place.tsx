@@ -5,7 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Trophy } from "lucide-react";
+import { Loader2, Plus, Trophy, ExternalLink } from "lucide-react";
+import { useChainId } from "wagmi";
 import { useThePlaceContract } from "@/hooks/use-the-place-contract";
 
 interface CompanyLogo {
@@ -26,6 +27,7 @@ export function ThePlace() {
 	const [logos, setLogos] = useState<CompanyLogo[]>([]);
 	const companyUrlId = useId();
 	const liveCanvasId = useId();
+	const chainId = useChainId();
 
 	// Blockchain integration
 	const {
@@ -45,6 +47,18 @@ export function ThePlace() {
 	const GRID_SIZE = 7;
 	const CELL_SIZE = 45; // Mobile-friendly size
 	const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
+
+	// Chain ID to explorer URL mapping
+	const CHAIN_EXPLORERS: Record<number, string> = {
+		1: "https://etherscan.io",
+		10: "https://optimistic.etherscan.io",
+		56: "https://bscscan.com",
+		137: "https://polygonscan.com",
+		8453: "https://basescan.org",
+		42161: "https://arbiscan.io",
+		421614: "https://sepolia.arbiscan.io", // Arbitrum Sepolia
+		11155111: "https://sepolia.etherscan.io", // Ethereum Sepolia
+	};
 
 	// Convert blockchain placements to display format
 	useEffect(() => {
@@ -79,6 +93,12 @@ export function ThePlace() {
 		ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 		drawLogos(ctx);
 	}, [logos, userPlacement, isConfirmed, CANVAS_SIZE]);
+
+	// Get explorer URL for current chain
+	const getExplorerUrl = (txHash: string) => {
+		const baseUrl = CHAIN_EXPLORERS[chainId];
+		return baseUrl ? `${baseUrl}/tx/${txHash}` : undefined;
+	};
 
 	const drawLogos = (ctx: CanvasRenderingContext2D) => {
 		logos.forEach(async (logo) => {
@@ -139,6 +159,36 @@ export function ThePlace() {
 
 		const randomIndex = Math.floor(Math.random() * availablePositions.length);
 		return availablePositions[randomIndex];
+	};
+
+	// Handle canvas click to open company website
+	const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const rect = canvas.getBoundingClientRect();
+		const scaleX = canvas.width / rect.width;
+		const scaleY = canvas.height / rect.height;
+
+		const clickX = Math.floor(
+			((event.clientX - rect.left) * scaleX) / CELL_SIZE,
+		);
+		const clickY = Math.floor(
+			((event.clientY - rect.top) * scaleY) / CELL_SIZE,
+		);
+
+		// Find logo at clicked position
+		const clickedLogo = logos.find(
+			(logo) => logo.x === clickX && logo.y === clickY,
+		);
+
+		if (clickedLogo) {
+			// Normalize URL and open in new tab
+			const url = clickedLogo.url.startsWith("http")
+				? clickedLogo.url
+				: `https://${clickedLogo.url}`;
+			window.open(url, "_blank", "noopener,noreferrer");
+		}
 	};
 
 	const fetchCompanyLogo = async (
@@ -326,6 +376,16 @@ export function ThePlace() {
 								<code className="bg-green-100 px-2 py-1 rounded text-xs font-mono">
 									{hash.slice(0, 10)}...{hash.slice(-8)}
 								</code>
+								{getExplorerUrl(hash) && (
+									<a
+										href={getExplorerUrl(hash)}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center text-green-600 hover:text-green-700"
+									>
+										<ExternalLink className="h-3 w-3" />
+									</a>
+								)}
 							</div>
 						</div>
 					</AlertDescription>
@@ -345,7 +405,8 @@ export function ThePlace() {
 							<canvas
 								id={liveCanvasId}
 								ref={canvasRef}
-								className="border rounded-lg max-w-full h-auto"
+								onClick={handleCanvasClick}
+								className="border rounded-lg max-w-full h-auto cursor-pointer"
 								style={{
 									width: "100%",
 									maxWidth: `${CANVAS_SIZE}px`,
@@ -354,6 +415,9 @@ export function ThePlace() {
 								}}
 							/>
 						</div>
+						<p className="text-sm text-muted-foreground text-center mt-2">
+							Click on any logo to visit the company's website
+						</p>
 					</div>
 				</div>
 			</Card>
