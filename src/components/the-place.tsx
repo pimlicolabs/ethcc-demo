@@ -208,12 +208,14 @@ export function ThePlace() {
 				`https://${domain}/favicon.ico`,
 			];
 
+			let logoFound = false;
 			for (const logoUrl of logoSources) {
 				try {
 					const response = await fetch(
 						`/api/proxy-image?url=${encodeURIComponent(logoUrl)}`,
 					);
 					if (response.ok) {
+						logoFound = true;
 						return {
 							logoUrl: logoUrl,
 							companyName: domain.replace("www.", ""),
@@ -224,7 +226,14 @@ export function ThePlace() {
 				}
 			}
 
-			// Fallback to a default logo with company initial
+			// If no logos were found, throw an error to prevent transaction
+			if (!logoFound) {
+				throw new Error(
+					`Unable to fetch logo for ${domain}. Please try a different company URL.`,
+				);
+			}
+
+			// This should not be reached, but keep fallback for safety
 			return {
 				logoUrl: `data:image/svg+xml,${encodeURIComponent(`
 					<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
@@ -236,7 +245,10 @@ export function ThePlace() {
 				`)}`,
 				companyName: domain.replace("www.", ""),
 			};
-		} catch {
+		} catch (error) {
+			if (error instanceof Error) {
+				throw error;
+			}
 			throw new Error("Invalid URL format");
 		}
 	};

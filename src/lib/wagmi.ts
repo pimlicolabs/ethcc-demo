@@ -23,11 +23,7 @@ Batua.create({
 	chains: [arbitrumSepolia],
 	dappName: "Pimlico",
 	walletName: "Batua",
-	boosted: {
-		callGasLimit: BigInt(300_000),
-		verificationGasLimit: BigInt(1_000_000),
-		preVerificationGas: BigInt(0),
-	},
+	boosted: true,
 	rpc: {
 		transports: {
 			[arbitrumSepolia.id]: http("https://arbitrum-sepolia-rpc.publicnode.com"),
