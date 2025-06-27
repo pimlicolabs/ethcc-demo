@@ -53,6 +53,88 @@ contract ThePlace {
         uint256 positionId = getPositionId(x, y);
         return positionToUser[positionId] == address(0);
     }
+    
+    // Helper function to convert string to lowercase for comparison
+    function _toLower(string memory str) private pure returns (string memory) {
+        bytes memory bStr = bytes(str);
+        bytes memory bLower = new bytes(bStr.length);
+        for (uint i = 0; i < bStr.length; i++) {
+            if ((uint8(bStr[i]) >= 65) && (uint8(bStr[i]) <= 90)) {
+                bLower[i] = bytes1(uint8(bStr[i]) + 32);
+            } else {
+                bLower[i] = bStr[i];
+            }
+        }
+        return string(bLower);
+    }
+    
+    // Helper function to check if a string contains another string
+    function _contains(string memory where, string memory what) private pure returns (bool) {
+        bytes memory whereBytes = bytes(where);
+        bytes memory whatBytes = bytes(what);
+        
+        if (whatBytes.length > whereBytes.length) return false;
+        
+        for (uint i = 0; i <= whereBytes.length - whatBytes.length; i++) {
+            bool found = true;
+            for (uint j = 0; j < whatBytes.length; j++) {
+                if (whereBytes[i + j] != whatBytes[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) return true;
+        }
+        return false;
+    }
+    
+    // Check if content contains banned domains/keywords
+    function _containsBannedContent(string memory url, string memory name) private pure returns (bool) {
+        string memory lowerUrl = _toLower(url);
+        string memory lowerName = _toLower(name);
+        
+        // Hardcoded list of banned domains and keywords
+        string[50] memory bannedTerms = [
+            "pornhub", "xvideos", "xnxx", "xhamster", "redtube",
+            "youporn", "porn", "xxx", "sex", "nude",
+            "onlyfans", "chaturbate", "livejasmin", "stripchat", "bongacams",
+            "cam4", "myfreecams", "camsoda", "flirt4free", "streamate",
+            "imlive", "adult", "nsfw", "18+", "milf",
+            "teen", "amateur", "webcam", "cam", "fetish",
+            "bdsm", "hentai", "rule34", "furry", "yiff",
+            "e621", "nhentai", "hanime", "fakku", "dlsite",
+            "dmm", "jav", "av", "gravure", "erotic",
+            "lewd", "ecchi", "oppai", "ahegao", "doujin"
+        ];
+        
+        // Additional illegal/harmful content keywords
+        string[20] memory illegalTerms = [
+            "drugs", "cocaine", "heroin", "meth", "weed",
+            "marijuana", "cannabis", "darkweb", "darknet", "silkroad",
+            "weapons", "guns", "explosives", "bomb", "terrorism",
+            "hitman", "assassination", "murder", "illegal", "piracy"
+        ];
+        
+        // Check banned terms
+        for (uint i = 0; i < bannedTerms.length; i++) {
+            if (bytes(bannedTerms[i]).length > 0) {
+                if (_contains(lowerUrl, bannedTerms[i]) || _contains(lowerName, bannedTerms[i])) {
+                    return true;
+                }
+            }
+        }
+        
+        // Check illegal terms
+        for (uint i = 0; i < illegalTerms.length; i++) {
+            if (bytes(illegalTerms[i]).length > 0) {
+                if (_contains(lowerUrl, illegalTerms[i]) || _contains(lowerName, illegalTerms[i])) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
 
     // Place or update company logo
     function placeCompany(
@@ -63,6 +145,7 @@ contract ThePlace {
     ) external {
         require(bytes(companyUrl).length > 0, "Company URL cannot be empty");
         require(bytes(companyName).length > 0, "Company name cannot be empty");
+        require(!_containsBannedContent(companyUrl, companyName), "Content contains inappropriate or illegal terms");
         
         uint256 newPositionId = getPositionId(x, y);
         

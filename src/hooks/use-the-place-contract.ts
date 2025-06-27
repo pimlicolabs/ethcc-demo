@@ -11,7 +11,7 @@ import { THE_PLACE_ABI } from "@/lib/contracts/the-place-abi";
 
 // TODO: Replace with actual deployed contract address
 const THE_PLACE_CONTRACT_ADDRESS =
-	"0xe03379F37363c380D5205eEE151b918e184C3495" as const;
+	"0x41c572b02C884048153AB4191B4C0ABf950E1961" as const;
 
 export interface CompanyPlacement {
 	companyUrl: string;

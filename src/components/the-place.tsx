@@ -5,9 +5,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Trophy, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Trophy, ExternalLink, AlertCircle } from "lucide-react";
 import { useChainId } from "wagmi";
 import { useThePlaceContract } from "@/hooks/use-the-place-contract";
+import { containsBannedContent, isValidUrl } from "@/lib/content-validation";
 
 interface CompanyLogo {
 	id: string;
@@ -24,6 +25,7 @@ export function ThePlace() {
 	const [companyUrl, setCompanyUrl] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [validationError, setValidationError] = useState<string | null>(null);
 	const [logos, setLogos] = useState<CompanyLogo[]>([]);
 	const companyUrlId = useId();
 	const liveCanvasId = useId();
@@ -239,6 +241,29 @@ export function ThePlace() {
 		}
 	};
 
+	// Validate URL input
+	const validateInput = (url: string) => {
+		if (!url.trim()) {
+			setValidationError(null);
+			return;
+		}
+
+		// Check URL format
+		if (!isValidUrl(url)) {
+			setValidationError("Please enter a valid URL");
+			return;
+		}
+
+		// Check for banned content
+		const { isValid, reason } = containsBannedContent(url, url);
+		if (!isValid) {
+			setValidationError(reason || "Content not allowed");
+			return;
+		}
+
+		setValidationError(null);
+	};
+
 	const handleAddLogo = async () => {
 		if (!companyUrl.trim()) {
 			setError("Please enter a company URL");
@@ -250,12 +275,29 @@ export function ThePlace() {
 			return;
 		}
 
+		// Client-side validation
+		if (!isValidUrl(companyUrl)) {
+			setError("Please enter a valid URL");
+			return;
+		}
+
 		setIsLoading(true);
 		setError(null);
 
 		try {
 			// Fetch company logo to validate URL and get company name
 			const { companyName } = await fetchCompanyLogo(companyUrl);
+
+			// Final content validation with actual company name
+			const { isValid, reason } = containsBannedContent(
+				companyUrl,
+				companyName,
+			);
+			if (!isValid) {
+				setError(reason || "Content not allowed");
+				setIsLoading(false);
+				return;
+			}
 
 			// Find a random available position
 			const randomPosition = findRandomAvailablePosition();
@@ -274,6 +316,7 @@ export function ThePlace() {
 			);
 
 			setCompanyUrl("");
+			setValidationError(null);
 		} catch (error) {
 			setError(
 				error instanceof Error ? error.message : "Failed to place company logo",
@@ -315,9 +358,18 @@ export function ThePlace() {
 								type="url"
 								placeholder="company.com or https://company.com"
 								value={companyUrl}
-								onChange={(e) => setCompanyUrl(e.target.value)}
+								onChange={(e) => {
+									setCompanyUrl(e.target.value);
+									validateInput(e.target.value);
+								}}
 								disabled={isLoading}
 							/>
+							{validationError && (
+								<p className="text-sm text-destructive mt-2 flex items-center gap-1">
+									<AlertCircle className="w-3 h-3" />
+									{validationError}
+								</p>
+							)}
 						</div>
 
 						<Button
@@ -328,7 +380,8 @@ export function ThePlace() {
 								isConfirming ||
 								!companyUrl.trim() ||
 								!isConnected ||
-								logos.length >= 49
+								logos.length >= 49 ||
+								!!validationError
 							}
 							className="w-full"
 						>
