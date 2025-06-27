@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useAccount } from "wagmi";
 import { CookieClicker } from "@/components/cookie-clicker";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -7,6 +9,19 @@ import { useRouter } from "next/navigation";
 
 export default function CookieClickerPage() {
 	const router = useRouter();
+	const { isConnected } = useAccount();
+
+	// Redirect to home page if wallet is not connected
+	useEffect(() => {
+		if (!isConnected) {
+			router.push("/");
+		}
+	}, [isConnected, router]);
+
+	// Don't render the page if wallet is not connected
+	if (!isConnected) {
+		return null;
+	}
 
 	return (
 		<div className="min-h-screen flex flex-col">

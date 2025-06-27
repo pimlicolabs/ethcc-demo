@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { useEffect, useRef, useState, useId } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Plus, ExternalLink, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Loader2, Plus, Trophy } from "lucide-react";
 import { useThePlaceContract } from "@/hooks/use-the-place-contract";
 
 interface CompanyLogo {
@@ -24,6 +24,8 @@ export function ThePlace() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [logos, setLogos] = useState<CompanyLogo[]>([]);
+	const companyUrlId = useId();
+	const liveCanvasId = useId();
 
 	// Blockchain integration
 	const {
@@ -37,7 +39,6 @@ export function ThePlace() {
 		isConnected,
 		userPlacement,
 		placeCompany,
-		checkPositionAvailable,
 	} = useThePlaceContract();
 
 	// Canvas configuration for mobile-friendly 7x7 grid (49 spots, close to 50)
@@ -47,23 +48,23 @@ export function ThePlace() {
 
 	// Convert blockchain placements to display format
 	useEffect(() => {
-		const convertedLogos: CompanyLogo[] = placements.map(
-			(placement, index) => ({
-				id: `${placement.user}-${placement.timestamp}`,
-				url: placement.companyUrl,
-				logoUrl: "", // Will be fetched when drawing
-				companyName: placement.companyName,
-				x: placement.x,
-				y: placement.y,
-				address: placement.user,
-			}),
-		);
+		const convertedLogos: CompanyLogo[] = placements.map((placement) => ({
+			id: `${placement.user}-${placement.timestamp}`,
+			url: placement.companyUrl,
+			logoUrl: "", // Will be fetched when drawing
+			companyName: placement.companyName,
+			x: placement.x,
+			y: placement.y,
+			address: placement.user,
+		}));
 
 		setLogos(convertedLogos);
 	}, [placements]);
 
 	// Initialize canvas
 	useEffect(() => {
+		if (!userPlacement && !isConfirmed) return; // Only show canvas after user has placed something
+
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 
@@ -74,31 +75,10 @@ export function ThePlace() {
 		canvas.width = CANVAS_SIZE;
 		canvas.height = CANVAS_SIZE;
 
-		// Draw grid
-		drawGrid(ctx);
+		// Clear canvas and draw logos only (no grid)
+		ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 		drawLogos(ctx);
-	}, [logos]);
-
-	const drawGrid = (ctx: CanvasRenderingContext2D) => {
-		ctx.strokeStyle = "#e2e8f0";
-		ctx.lineWidth = 1;
-
-		// Draw vertical lines
-		for (let i = 0; i <= GRID_SIZE; i++) {
-			ctx.beginPath();
-			ctx.moveTo(i * CELL_SIZE, 0);
-			ctx.lineTo(i * CELL_SIZE, CANVAS_SIZE);
-			ctx.stroke();
-		}
-
-		// Draw horizontal lines
-		for (let i = 0; i <= GRID_SIZE; i++) {
-			ctx.beginPath();
-			ctx.moveTo(0, i * CELL_SIZE);
-			ctx.lineTo(CANVAS_SIZE, i * CELL_SIZE);
-			ctx.stroke();
-		}
-	};
+	}, [logos, userPlacement, isConfirmed, CANVAS_SIZE]);
 
 	const drawLogos = (ctx: CanvasRenderingContext2D) => {
 		logos.forEach(async (logo) => {
@@ -188,7 +168,7 @@ export function ThePlace() {
 						};
 					}
 				} catch {
-					continue;
+					// Continue to next logo source
 				}
 			}
 
@@ -204,7 +184,7 @@ export function ThePlace() {
 				`)}`,
 				companyName: domain.replace("www.", ""),
 			};
-		} catch (error) {
+		} catch {
 			throw new Error("Invalid URL format");
 		}
 	};
@@ -253,20 +233,87 @@ export function ThePlace() {
 		}
 	};
 
+	// Show initial URL input form if user hasn't placed anything yet
+	if (!userPlacement && !isConfirmed) {
+		return (
+			<div className="w-full max-w-md mx-auto space-y-6">
+				<div className="text-center">
+					<h2 className="text-xl font-bold mb-2">🎨 The Place</h2>
+					<p className="text-sm text-muted-foreground">
+						Add your company logo to a random spot on the collaborative canvas
+					</p>
+				</div>
+
+				{(error || contractError) && (
+					<Alert variant="destructive">
+						<AlertDescription>
+							{error || contractError?.message}
+						</AlertDescription>
+					</Alert>
+				)}
+
+				<Card className="p-4">
+					<div className="space-y-4">
+						<div>
+							<label
+								htmlFor={companyUrlId}
+								className="text-sm font-medium mb-2 block"
+							>
+								Company URL
+							</label>
+							<Input
+								id={companyUrlId}
+								type="url"
+								placeholder="company.com or https://company.com"
+								value={companyUrl}
+								onChange={(e) => setCompanyUrl(e.target.value)}
+								disabled={isLoading}
+							/>
+						</div>
+
+						<Button
+							onClick={handleAddLogo}
+							disabled={
+								isLoading ||
+								isContractLoading ||
+								isConfirming ||
+								!companyUrl.trim() ||
+								!isConnected ||
+								logos.length >= 49
+							}
+							className="w-full"
+						>
+							{isLoading || isContractLoading ? (
+								<>
+									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+									{isConfirming ? "Confirming..." : "Adding Logo..."}
+								</>
+							) : logos.length >= 49 ? (
+								"🎉 Canvas Full!"
+							) : (
+								<>
+									<Plus className="w-4 h-4 mr-2" />
+									{isConnected
+										? "Add Logo to Random Position"
+										: "Connect Wallet First"}
+								</>
+							)}
+						</Button>
+					</div>
+				</Card>
+			</div>
+		);
+	}
+
+	// Show canvas view after user has placed their logo
 	return (
 		<div className="w-full max-w-md mx-auto space-y-6">
 			<div className="text-center">
 				<h2 className="text-xl font-bold mb-2">🎨 The Place</h2>
 				<p className="text-sm text-muted-foreground">
-					Add your company logo to a random spot on the collaborative canvas
+					Collaborative canvas with company logos
 				</p>
 			</div>
-
-			{(error || contractError) && (
-				<Alert variant="destructive">
-					<AlertDescription>{error || contractError?.message}</AlertDescription>
-				</Alert>
-			)}
 
 			{isConfirmed && hash && (
 				<Alert className="bg-green-50 border-green-200">
@@ -288,24 +335,15 @@ export function ThePlace() {
 			<Card className="p-4">
 				<div className="space-y-4">
 					<div>
-						<label className="text-sm font-medium mb-2 block">
-							Company URL
-						</label>
-						<Input
-							type="url"
-							placeholder="company.com or https://company.com"
-							value={companyUrl}
-							onChange={(e) => setCompanyUrl(e.target.value)}
-							disabled={isLoading}
-						/>
-					</div>
-
-					<div>
-						<label className="text-sm font-medium mb-2 block">
+						<label
+							htmlFor={liveCanvasId}
+							className="text-sm font-medium mb-2 block"
+						>
 							Live Canvas ({logos.length}/49 spots filled)
 						</label>
 						<div className="flex justify-center">
 							<canvas
+								id={liveCanvasId}
 								ref={canvasRef}
 								className="border rounded-lg max-w-full h-auto"
 								style={{
@@ -316,47 +354,13 @@ export function ThePlace() {
 								}}
 							/>
 						</div>
-						<p className="text-sm text-muted-foreground text-center mt-2">
-							Your logo will be placed at a random available position
-						</p>
 					</div>
-
-					<Button
-						onClick={handleAddLogo}
-						disabled={
-							isLoading ||
-							isContractLoading ||
-							isConfirming ||
-							!companyUrl.trim() ||
-							!isConnected ||
-							logos.length >= 49
-						}
-						className="w-full"
-					>
-						{isLoading || isContractLoading ? (
-							<>
-								<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-								{isConfirming ? "Confirming..." : "Adding Logo..."}
-							</>
-						) : logos.length >= 49 ? (
-							<>🎉 Canvas Full!</>
-						) : (
-							<>
-								<Plus className="w-4 h-4 mr-2" />
-								{isConnected
-									? "Add Logo to Random Position"
-									: "Connect Wallet First"}
-							</>
-						)}
-					</Button>
 				</div>
 			</Card>
 
 			{logos.length > 0 && (
 				<Card className="p-4">
-					<h3 className="font-medium mb-3">
-						Companies on Canvas ({logos.length}/49)
-					</h3>
+					<h3 className="font-medium mb-3">Companies ({logos.length}/49)</h3>
 					<div className="space-y-2 max-h-40 overflow-y-auto">
 						{logos.map((logo) => (
 							<div
@@ -381,26 +385,6 @@ export function ThePlace() {
 								</div>
 							</div>
 						))}
-					</div>
-				</Card>
-			)}
-
-			{userPlacement && (
-				<Card className="p-4 bg-primary/5 border-primary/20">
-					<h3 className="font-medium mb-2 text-primary">
-						Your Company Placement
-					</h3>
-					<div className="text-sm text-muted-foreground">
-						<p>
-							<strong>Company:</strong> {userPlacement.companyName}
-						</p>
-						<p>
-							<strong>Position:</strong> Row {userPlacement.y + 1}, Column{" "}
-							{userPlacement.x + 1}
-						</p>
-						<p>
-							<strong>URL:</strong> {userPlacement.companyUrl}
-						</p>
 					</div>
 				</Card>
 			)}
