@@ -4,7 +4,9 @@ import { useEffect, useCallback, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy } from "lucide-react";
+import { Trophy, ExternalLink, History } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useChainId } from "wagmi";
 import { useGameState } from "@/hooks/use-game-state";
 import { useContractInteractions } from "@/hooks/use-contract-interactions";
 import { useLeaderboard } from "@/hooks/use-leaderboard";
@@ -15,6 +17,18 @@ import { GameLeaderboard } from "@/components/game-leaderboard";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { UsernamePrompt } from "@/components/username-prompt";
 import { getStoredUsername } from "@/lib/username";
+
+// Chain ID to explorer URL mapping
+const CHAIN_EXPLORERS: Record<number, string> = {
+	1: "https://etherscan.io",
+	10: "https://optimistic.etherscan.io",
+	56: "https://bscscan.com",
+	137: "https://polygonscan.com",
+	8453: "https://basescan.org",
+	42161: "https://arbiscan.io",
+	421614: "https://sepolia.arbiscan.io", // Arbitrum Sepolia
+	11155111: "https://sepolia.etherscan.io", // Ethereum Sepolia
+};
 
 export function CookieClicker() {
 	// State for first-time user instructions
@@ -30,6 +44,8 @@ export function CookieClicker() {
 	const [showTryAgain, setShowTryAgain] = useState(false);
 
 	// Custom hooks
+	const router = useRouter();
+	const chainId = useChainId();
 	const gameState = useGameState();
 	const usernamePrompt = useUsernamePrompt();
 	const contractData = useContractInteractions(
@@ -59,10 +75,12 @@ export function CookieClicker() {
 		bestSession,
 		totalCookies,
 		sessionCount,
+		sessionHistory,
 		recordGameSession,
 		isPending,
 		isConfirming,
 		isConfirmed,
+		hash,
 	} = contractData;
 
 	// Stop game callback
@@ -102,6 +120,12 @@ export function CookieClicker() {
 			}, 1000);
 		}
 	}, [isConfirmed, refetchLeaderboard]);
+
+	// Get explorer URL for current chain
+	const getExplorerUrl = (txHash: string) => {
+		const baseUrl = CHAIN_EXPLORERS[chainId];
+		return baseUrl ? `${baseUrl}/tx/${txHash}` : null;
+	};
 
 	// Hide "Try again" tooltip when user starts playing again
 	useEffect(() => {
@@ -236,7 +260,36 @@ export function CookieClicker() {
 				totalCookies={totalCookies}
 				isConnected={isConnected}
 				formatNumber={formatNumber}
+				hasHistory={sessionHistory.length > 0}
+				onHistoryClick={() => router.push("/history")}
 			/>
+
+			{isConfirmed && hash && (
+				<Alert className="bg-green-50 border-green-200">
+					<Trophy className="h-4 w-4 text-green-600" />
+					<AlertDescription className="text-green-800">
+						<div className="space-y-2">
+							<p className="font-medium">Score submitted successfully!</p>
+							<div className="flex items-center gap-2 text-sm">
+								<span>Transaction:</span>
+								<code className="bg-green-100 px-2 py-1 rounded text-xs font-mono">
+									{hash.slice(0, 10)}...{hash.slice(-8)}
+								</code>
+								{getExplorerUrl(hash) && (
+									<a
+										href={getExplorerUrl(hash)}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center text-green-600 hover:text-green-700"
+									>
+										<ExternalLink className="h-3 w-3" />
+									</a>
+								)}
+							</div>
+						</div>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			<GameLeaderboard
 				leaderboard={leaderboard}

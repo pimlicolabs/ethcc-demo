@@ -251,6 +251,19 @@ contract CookieClicker {
     }
     
     /**
+     * @dev Get all game sessions for a user by their address
+     * @param player The player's address
+     * @return sessions Array of all GameSession structs for the player
+     */
+    function getPlayerSessionHistory(address player) 
+        external 
+        view 
+        returns (GameSession[] memory sessions) 
+    {
+        return playerSessions[player];
+    }
+    
+    /**
      * @dev Get the total number of players who have played
      * @return The total number of unique players
      */

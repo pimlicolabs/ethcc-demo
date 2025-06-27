@@ -2,7 +2,7 @@ import { arbitrumSepolia, sepolia } from "viem/chains";
 
 export const COOKIE_CLICKER_ADDRESS = {
 	[sepolia.id]: "0x35F280c2233d64be5BCfAf3A9F3A4273829b1722",
-	[arbitrumSepolia.id]: "0xD943E4E1f51cDD3dD389361a22a309fd2bfd9454",
+	[arbitrumSepolia.id]: "0x5FA406cc93F191CF4c5e805763A20382D5289783",
 } as const;
 
 export const COOKIE_CLICKER_ABI = [
@@ -250,6 +250,47 @@ export const COOKIE_CLICKER_ABI = [
 				internalType: "uint256",
 				name: "",
 				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+		],
+		name: "getPlayerSessionHistory",
+		outputs: [
+			{
+				components: [
+					{
+						internalType: "uint256",
+						name: "cookies",
+						type: "uint256",
+					},
+					{
+						internalType: "uint256",
+						name: "timestamp",
+						type: "uint256",
+					},
+					{
+						internalType: "uint256",
+						name: "duration",
+						type: "uint256",
+					},
+					{
+						internalType: "string",
+						name: "username",
+						type: "string",
+					},
+				],
+				internalType: "struct CookieClicker.GameSession[]",
+				name: "sessions",
+				type: "tuple[]",
 			},
 		],
 		stateMutability: "view",

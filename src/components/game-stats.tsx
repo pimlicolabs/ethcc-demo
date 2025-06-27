@@ -1,5 +1,6 @@
-import { Cookie, Clock, Trophy, Zap } from "lucide-react";
+import { Cookie, Clock, Trophy, Zap, History } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { BestSession } from "@/hooks/use-contract-interactions";
 
 interface GameStatsProps {
@@ -9,6 +10,8 @@ interface GameStatsProps {
 	totalCookies: number;
 	isConnected: boolean;
 	formatNumber: (num: number) => string;
+	hasHistory?: boolean;
+	onHistoryClick?: () => void;
 }
 
 export function GameStats({
@@ -18,6 +21,8 @@ export function GameStats({
 	totalCookies,
 	isConnected,
 	formatNumber,
+	hasHistory = false,
+	onHistoryClick,
 }: GameStatsProps) {
 	if (!isConnected) return null;
 
@@ -33,7 +38,19 @@ export function GameStats({
 
 	return (
 		<Card className="p-4">
-			<h2 className="text-lg font-semibold mb-3">Your Stats</h2>
+			<div className="flex items-center justify-between mb-3">
+				<h2 className="text-lg font-semibold">Your Stats</h2>
+				{hasHistory && onHistoryClick && (
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={onHistoryClick}
+						className="p-2"
+					>
+						<History className="w-4 h-4" />
+					</Button>
+				)}
+			</div>
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 				<div className="text-center">
 					<Trophy className="w-6 h-6 mx-auto mb-1 text-primary" />

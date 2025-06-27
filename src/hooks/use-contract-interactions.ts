@@ -19,6 +19,13 @@ export interface BestSession {
 	username?: string;
 }
 
+export interface GameSession {
+	cookies: number;
+	timestamp: number;
+	duration: number;
+	username: string;
+}
+
 export function useContractInteractions(
 	promptForUsername?: () => Promise<string | null>,
 ) {
@@ -63,6 +70,18 @@ export function useContractInteractions(
 		},
 	});
 
+	const { data: sessionHistoryData, refetch: refetchSessionHistory } =
+		useReadContract({
+			address: COOKIE_CLICKER_ADDRESS[chainId],
+			abi: COOKIE_CLICKER_ABI,
+			functionName: "getPlayerSessionHistory",
+			args: address ? [address] : undefined,
+			query: {
+				enabled: !!address,
+				refetchInterval: 5000,
+			},
+		});
+
 	const recordGameSession = useCallback(
 		async (cookies: number, duration: number) => {
 			if (!isConnected || !address) return;
@@ -103,9 +122,16 @@ export function useContractInteractions(
 				refetchBestScore();
 				refetchTotalCookies();
 				refetchSessionCount();
+				refetchSessionHistory();
 			}, 1000);
 		}
-	}, [isConfirmed, refetchBestScore, refetchTotalCookies, refetchSessionCount]);
+	}, [
+		isConfirmed,
+		refetchBestScore,
+		refetchTotalCookies,
+		refetchSessionCount,
+		refetchSessionHistory,
+	]);
 
 	// Extract best session data
 	const bestSession: BestSession | null = bestSessionData
@@ -117,6 +143,16 @@ export function useContractInteractions(
 			}
 		: null;
 
+	// Extract session history data
+	const sessionHistory: GameSession[] = sessionHistoryData
+		? (sessionHistoryData as any[]).map((session: any) => ({
+				cookies: Number(session.cookies),
+				timestamp: Number(session.timestamp),
+				duration: Number(session.duration),
+				username: session.username,
+			}))
+		: [];
+
 	return {
 		address,
 		isConnected,
@@ -124,13 +160,16 @@ export function useContractInteractions(
 		bestSession,
 		totalCookies: totalCookies ? Number(totalCookies) : 0,
 		sessionCount: sessionCount ? Number(sessionCount) : 0,
+		sessionHistory,
 		recordGameSession,
 		isPending,
 		isConfirming,
 		isConfirmed,
+		hash,
 		error,
 		refetchBestScore,
 		refetchTotalCookies,
 		refetchSessionCount,
+		refetchSessionHistory,
 	};
 }

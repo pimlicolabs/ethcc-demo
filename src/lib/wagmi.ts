@@ -24,7 +24,7 @@ Batua.create({
 	dappName: "Pimlico",
 	walletName: "Batua",
 	boosted: {
-		callGasLimit: BigInt(150_000),
+		callGasLimit: BigInt(300_000),
 		verificationGasLimit: BigInt(1_000_000),
 		preVerificationGas: BigInt(0),
 	},
