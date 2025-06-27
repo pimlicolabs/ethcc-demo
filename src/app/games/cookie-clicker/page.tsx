@@ -1,22 +1,39 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { CookieClicker } from "@/components/cookie-clicker";
 import { Button } from "@/components/ui/button";
+import { LoadingScreen } from "@/components/loading-screen";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CookieClickerPage() {
 	const router = useRouter();
-	const { isConnected } = useAccount();
+	const { isConnected, isConnecting } = useAccount();
+	const [isLoading, setIsLoading] = useState(true);
 
-	// Redirect to home page if wallet is not connected
+	// Wait for wallet connection check to complete
 	useEffect(() => {
-		if (!isConnected) {
+		// Add a small delay to ensure wagmi has properly initialized
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 1000);
+
+		return () => clearTimeout(timer);
+	}, []);
+
+	// Redirect to home page if wallet is not connected (after loading is complete)
+	useEffect(() => {
+		if (!isLoading && !isConnecting && !isConnected) {
 			router.push("/");
 		}
-	}, [isConnected, router]);
+	}, [isLoading, isConnecting, isConnected, router]);
+
+	// Show loading screen while checking connection status
+	if (isLoading || isConnecting) {
+		return <LoadingScreen />;
+	}
 
 	// Don't render the page if wallet is not connected
 	if (!isConnected) {
@@ -24,8 +41,8 @@ export default function CookieClickerPage() {
 	}
 
 	return (
-		<div className="min-h-screen flex flex-col">
-			<div className="flex items-center justify-between p-4 border-b">
+		<div className="min-h-screen flex flex-col pt-16">
+			<div className="flex items-center justify-between p-4 border-b bg-background">
 				<Button
 					variant="ghost"
 					size="sm"
@@ -35,8 +52,10 @@ export default function CookieClickerPage() {
 					<ArrowLeft className="w-4 h-4" />
 					Back
 				</Button>
+				<h1 className="text-lg font-semibold">Cookie Clicker</h1>
+				<div className="w-16" />
 			</div>
-			<div className="flex-1 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8">
+			<div className="flex-1 flex flex-col px-4 py-4">
 				<CookieClicker />
 			</div>
 		</div>

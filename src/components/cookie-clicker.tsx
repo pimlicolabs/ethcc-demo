@@ -167,7 +167,7 @@ export function CookieClicker() {
 	// Show instructions screen for first-time users
 	if (showInstructions) {
 		return (
-			<div className="w-full max-w-2xl mx-auto p-4 min-h-screen flex items-center justify-center">
+			<div className="fixed inset-0 top-16 flex items-center justify-center px-4">
 				<Card className="p-8 max-w-md w-full animate-in fade-in slide-in-from-bottom-4">
 					<div className="space-y-6 text-center">
 						<div className="space-y-2">
@@ -225,7 +225,7 @@ export function CookieClicker() {
 	}
 
 	return (
-		<div className="w-full max-w-2xl mx-auto p-4 space-y-6 pt-12 relative">
+		<div className="w-full max-w-2xl mx-auto p-4 space-y-4 relative">
 			<UsernamePrompt
 				isOpen={usernamePrompt.isOpen}
 				onSubmit={usernamePrompt.onSubmit}
@@ -240,7 +240,6 @@ export function CookieClicker() {
 			/>
 
 			<div className="text-center">
-				<h1 className="text-2xl font-bold mb-2">Cookie Clicker</h1>
 				<div className="text-3xl font-bold text-primary mb-2">
 					{formatNumber(cookies)} cookies
 				</div>

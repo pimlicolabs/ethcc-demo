@@ -288,7 +288,6 @@ export function ThePlace() {
 		return (
 			<div className="w-full max-w-md mx-auto space-y-6">
 				<div className="text-center">
-					<h2 className="text-xl font-bold mb-2">🎨 The Place</h2>
 					<p className="text-sm text-muted-foreground">
 						Add your company logo to a random spot on the collaborative canvas
 					</p>
@@ -359,7 +358,6 @@ export function ThePlace() {
 	return (
 		<div className="w-full max-w-md mx-auto space-y-6">
 			<div className="text-center">
-				<h2 className="text-xl font-bold mb-2">🎨 The Place</h2>
 				<p className="text-sm text-muted-foreground">
 					Collaborative canvas with company logos
 				</p>
@@ -416,7 +414,7 @@ export function ThePlace() {
 							/>
 						</div>
 						<p className="text-sm text-muted-foreground text-center mt-2">
-							Click on any logo to visit the company's website
+							Click on any logo to visit their website
 						</p>
 					</div>
 				</div>
