@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useMemo } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,7 +16,6 @@ import { GameStats } from "@/components/game-stats";
 import { GameLeaderboard } from "@/components/game-leaderboard";
 import { LoadingOverlay } from "@/components/loading-overlay";
 import { UsernamePrompt } from "@/components/username-prompt";
-import { getStoredUsername } from "@/lib/username";
 
 // Chain ID to explorer URL mapping
 const CHAIN_EXPLORERS: Record<number, string> = {
@@ -48,8 +47,26 @@ export function CookieClicker() {
 	const chainId = useChainId();
 	const gameState = useGameState();
 	const usernamePrompt = useUsernamePrompt();
+	// Memoize the parameters to prevent excessive re-renders
+	const contractParams = useMemo(
+		() => ({
+			promptForUsername: usernamePrompt.promptForUsername,
+			userName: usernamePrompt.userName,
+			isUsernameSetOnBlockchain: Boolean(
+				usernamePrompt.isUsernameSetOnBlockchain,
+			),
+		}),
+		[
+			usernamePrompt.promptForUsername,
+			usernamePrompt.userName,
+			usernamePrompt.isUsernameSetOnBlockchain,
+		],
+	);
+
 	const contractData = useContractInteractions(
-		usernamePrompt.promptForUsername,
+		contractParams.promptForUsername,
+		contractParams.userName,
+		contractParams.isUsernameSetOnBlockchain,
 	);
 	const {
 		leaderboard,
@@ -295,7 +312,7 @@ export function CookieClicker() {
 				leaderboard={leaderboard}
 				isLoading={isLeaderboardLoading}
 				currentUserAddress={address}
-				currentUserUsername={getStoredUsername() || undefined}
+				currentUserUsername={usernamePrompt.userName || undefined}
 				formatNumber={formatNumber}
 			/>
 		</div>

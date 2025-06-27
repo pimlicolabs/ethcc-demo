@@ -10,7 +10,6 @@ contract CookieClicker {
         uint256 cookies;
         uint256 timestamp;
         uint256 duration; // in seconds
-        string username;
     }
 
     // Mapping from player address to their game sessions
@@ -24,6 +23,9 @@ contract CookieClicker {
     
     // Mapping to check if a player has been added to allPlayers array
     mapping(address => bool) public isPlayerTracked;
+    
+    // Mapping from player address to their username
+    mapping(address => string) public usernames;
     
     // Total number of cookies clicked across all players
     uint256 public totalCookiesClicked;
@@ -43,24 +45,47 @@ contract CookieClicker {
         uint256 newBestScore,
         uint256 previousBestScore
     );
+    
+    // Event emitted when a username is set or updated
+    event UsernameSet(
+        address indexed player,
+        string username
+    );
+
+    /**
+     * @dev Set or update the username for the caller's address
+     * @param username The username to set
+     */
+    function setUsername(string calldata username) external {
+        require(bytes(username).length > 0, "Username cannot be empty");
+        usernames[msg.sender] = username;
+        emit UsernameSet(msg.sender, username);
+    }
+    
+    /**
+     * @dev Get the username for a given address
+     * @param player The player's address
+     * @return The username of the player
+     */
+    function getUsername(address player) public view returns (string memory) {
+        return usernames[player];
+    }
 
     /**
      * @dev Record a game session with the number of cookies clicked
      * @param cookies The number of cookies clicked in this session
      * @param duration The duration of the game session in seconds
-     * @param username The username of the player
      */
-    function recordGameSession(uint256 cookies, uint256 duration, string calldata username) external {
+    function recordGameSession(uint256 cookies, uint256 duration) external {
         require(cookies > 0, "Cookies must be greater than 0");
         require(duration > 0, "Duration must be greater than 0");
-        require(bytes(username).length > 0, "Username cannot be empty");
+        require(bytes(usernames[msg.sender]).length > 0, "Username must be set before recording a session");
         
         // Create new game session
         GameSession memory newSession = GameSession({
             cookies: cookies,
             timestamp: block.timestamp,
-            duration: duration,
-            username: username
+            duration: duration
         });
         
         // Add to player's sessions
@@ -82,7 +107,7 @@ contract CookieClicker {
             emit NewBestScore(msg.sender, cookies, previousBest);
         }
         
-        emit GameSessionRecorded(msg.sender, username, cookies, duration, block.timestamp);
+        emit GameSessionRecorded(msg.sender, usernames[msg.sender], cookies, duration, block.timestamp);
     }
     
     /**
@@ -111,7 +136,7 @@ contract CookieClicker {
         require(sessionIndex < playerSessions[player].length, "Session index out of bounds");
         
         GameSession memory session = playerSessions[player][sessionIndex];
-        return (session.cookies, session.timestamp, session.duration, session.username);
+        return (session.cookies, session.timestamp, session.duration, usernames[player]);
     }
     
     /**
@@ -141,7 +166,7 @@ contract CookieClicker {
         }
         
         GameSession memory bestSession = playerSessions[player][bestSessionIndex];
-        return (bestSession.cookies, bestSession.timestamp, bestSession.duration, bestSession.username);
+        return (bestSession.cookies, bestSession.timestamp, bestSession.duration, usernames[player]);
     }
     
     /**
@@ -169,7 +194,7 @@ contract CookieClicker {
         
         uint256 latestIndex = playerSessions[player].length - 1;
         GameSession memory session = playerSessions[player][latestIndex];
-        return (session.cookies, session.timestamp, session.duration, session.username);
+        return (session.cookies, session.timestamp, session.duration, usernames[player]);
     }
     
     /**
@@ -244,7 +269,7 @@ contract CookieClicker {
             cookies[i] = bestSession.cookies;
             timestamps[i] = bestSession.timestamp;
             durations[i] = bestSession.duration;
-            usernames[i] = bestSession.username;
+            usernames[i] = CookieClicker.usernames[player];
         }
         
         return (players, cookies, timestamps, durations, usernames);

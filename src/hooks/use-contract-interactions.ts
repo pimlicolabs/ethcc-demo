@@ -1,15 +1,16 @@
 import confetti from "canvas-confetti";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { encodeFunctionData } from "viem";
 import {
 	useAccount,
-	useWaitForTransactionReceipt,
-	useWriteContract,
-	useReadContract,
 	useChainId,
+	useReadContract,
+	useSendCalls,
+	useWaitForCallsStatus,
 } from "wagmi";
 import {
-	COOKIE_CLICKER_ADDRESS,
 	COOKIE_CLICKER_ABI,
+	COOKIE_CLICKER_ADDRESS,
 } from "@/lib/contracts/cookie-clicker-abi";
 
 export interface BestSession {
@@ -28,13 +29,20 @@ export interface GameSession {
 
 export function useContractInteractions(
 	promptForUsername?: () => Promise<string | null>,
+	userName?: string | null,
+	isUsernameSetOnBlockchain?: boolean,
 ) {
 	const { address, isConnected } = useAccount();
-	const { writeContract, data: hash, isPending, error } = useWriteContract();
-	const { isLoading: isConfirming, isSuccess: isConfirmed } =
-		useWaitForTransactionReceipt({
-			hash,
-		});
+	const { sendCalls, data: callsId, isPending, error } = useSendCalls();
+	const { data: callsStatus, isLoading: isConfirming } = useWaitForCallsStatus({
+		id: callsId?.id,
+		query: {
+			enabled: !!callsId?.id,
+			refetchInterval: 2000,
+		},
+	});
+
+	const isConfirmed = callsStatus?.status === "success";
 
 	const chainId = useChainId();
 
@@ -46,7 +54,7 @@ export function useContractInteractions(
 		args: address ? [address] : undefined,
 		query: {
 			enabled: !!address,
-			refetchInterval: 5000,
+			refetchInterval: 15000,
 		},
 	});
 
@@ -55,7 +63,7 @@ export function useContractInteractions(
 		abi: COOKIE_CLICKER_ABI,
 		functionName: "getTotalCookiesClicked",
 		query: {
-			refetchInterval: 10000,
+			refetchInterval: 30000,
 		},
 	});
 
@@ -66,7 +74,7 @@ export function useContractInteractions(
 		args: address ? [address] : undefined,
 		query: {
 			enabled: !!address,
-			refetchInterval: 5000,
+			refetchInterval: 15000,
 		},
 	});
 
@@ -78,13 +86,16 @@ export function useContractInteractions(
 			args: address ? [address] : undefined,
 			query: {
 				enabled: !!address,
-				refetchInterval: 5000,
+				refetchInterval: 15000,
 			},
 		});
 
 	const recordGameSession = useCallback(
 		async (cookies: number, duration: number) => {
-			if (!isConnected || !address) return;
+			if (!isConnected || !address) {
+				return;
+			}
+
 			if (!promptForUsername) {
 				return;
 			}
@@ -95,17 +106,45 @@ export function useContractInteractions(
 					return;
 				}
 
-				writeContract({
-					address: COOKIE_CLICKER_ADDRESS[chainId],
-					abi: COOKIE_CLICKER_ABI,
-					functionName: "recordGameSession",
-					args: [BigInt(cookies), BigInt(duration), username],
+				const calls = [];
+
+				// Add setUsername call if username not set on blockchain
+				if (!isUsernameSetOnBlockchain) {
+					calls.push({
+						to: COOKIE_CLICKER_ADDRESS[chainId] as `0x${string}`,
+						data: encodeFunctionData({
+							abi: COOKIE_CLICKER_ABI,
+							functionName: "setUsername",
+							args: [username],
+						}),
+					});
+				}
+
+				// Add recordGameSession call
+				calls.push({
+					to: COOKIE_CLICKER_ADDRESS[chainId] as `0x${string}`,
+					data: encodeFunctionData({
+						abi: COOKIE_CLICKER_ABI,
+						functionName: "recordGameSession",
+						args: [BigInt(cookies), BigInt(duration)],
+					}),
+				});
+
+				sendCalls({
+					calls,
 				});
 			} catch (err) {
 				console.error("Failed to record game session:", err);
 			}
 		},
-		[isConnected, address, writeContract, chainId, promptForUsername],
+		[
+			isConnected,
+			address,
+			sendCalls,
+			chainId,
+			promptForUsername,
+			isUsernameSetOnBlockchain,
+		],
 	);
 
 	// Success confetti and refetch data when transaction is confirmed
@@ -134,24 +173,34 @@ export function useContractInteractions(
 	]);
 
 	// Extract best session data
-	const bestSession: BestSession | null = bestSessionData
-		? {
-				cookies: Number(bestSessionData[0]),
-				timestamp: Number(bestSessionData[1]),
-				duration: Number(bestSessionData[2]),
-				username: bestSessionData[3] || undefined,
-			}
-		: null;
+	const bestSession: BestSession | null = useMemo(() => {
+		return bestSessionData
+			? {
+					cookies: Number(bestSessionData[0]),
+					timestamp: Number(bestSessionData[1]),
+					duration: Number(bestSessionData[2]),
+					username: bestSessionData[3] || undefined,
+				}
+			: null;
+	}, [bestSessionData]);
 
 	// Extract session history data
-	const sessionHistory: GameSession[] = sessionHistoryData
-		? (sessionHistoryData as any[]).map((session: any) => ({
-				cookies: Number(session.cookies),
-				timestamp: Number(session.timestamp),
-				duration: Number(session.duration),
-				username: session.username,
-			}))
-		: [];
+	const sessionHistory: GameSession[] = useMemo(() => {
+		return sessionHistoryData
+			? (
+					sessionHistoryData as Array<{
+						cookies: bigint;
+						timestamp: bigint;
+						duration: bigint;
+					}>
+				).map((session) => ({
+					cookies: Number(session.cookies),
+					timestamp: Number(session.timestamp),
+					duration: Number(session.duration),
+					username: userName || "",
+				}))
+			: [];
+	}, [sessionHistoryData, userName]);
 
 	return {
 		address,
@@ -165,11 +214,13 @@ export function useContractInteractions(
 		isPending,
 		isConfirming,
 		isConfirmed,
-		hash,
+		callsId,
+		callsStatus,
 		error,
 		refetchBestScore,
 		refetchTotalCookies,
 		refetchSessionCount,
 		refetchSessionHistory,
+		hash: callsStatus?.receipts?.[0]?.transactionHash,
 	};
 }

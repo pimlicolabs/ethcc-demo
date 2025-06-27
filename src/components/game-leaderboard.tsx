@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Crown, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { LeaderboardEntry } from "@/hooks/use-leaderboard";
@@ -10,7 +11,7 @@ interface GameLeaderboardProps {
 	formatNumber: (num: number) => string;
 }
 
-export function GameLeaderboard({
+export const GameLeaderboard = memo(function GameLeaderboard({
 	leaderboard,
 	isLoading,
 	currentUserAddress,
@@ -81,4 +82,4 @@ export function GameLeaderboard({
 			)}
 		</Card>
 	);
-}
+});

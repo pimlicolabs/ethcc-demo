@@ -2,7 +2,7 @@ import { arbitrumSepolia, sepolia } from "viem/chains";
 
 export const COOKIE_CLICKER_ADDRESS = {
 	[sepolia.id]: "0x35F280c2233d64be5BCfAf3A9F3A4273829b1722",
-	[arbitrumSepolia.id]: "0x5FA406cc93F191CF4c5e805763A20382D5289783",
+	[arbitrumSepolia.id]: "0x286837e8b533fec4ed4f612b000F729c55bC658A",
 } as const;
 
 export const COOKIE_CLICKER_ABI = [
@@ -80,16 +80,43 @@ export const COOKIE_CLICKER_ABI = [
 				name: "duration",
 				type: "uint256",
 			},
+		],
+		name: "recordGameSession",
+		outputs: [],
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [
 			{
 				internalType: "string",
 				name: "username",
 				type: "string",
 			},
 		],
-		name: "recordGameSession",
+		name: "setUsername",
 		outputs: [],
 		stateMutability: "nonpayable",
 		type: "function",
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{
+				indexed: true,
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+			{
+				indexed: false,
+				internalType: "string",
+				name: "username",
+				type: "string",
+			},
+		],
+		name: "UsernameSet",
+		type: "event",
 	},
 	{
 		inputs: [
@@ -282,11 +309,6 @@ export const COOKIE_CLICKER_ABI = [
 						name: "duration",
 						type: "uint256",
 					},
-					{
-						internalType: "string",
-						name: "username",
-						type: "string",
-					},
 				],
 				internalType: "struct CookieClicker.GameSession[]",
 				name: "sessions",
@@ -322,7 +344,7 @@ export const COOKIE_CLICKER_ABI = [
 			},
 			{
 				internalType: "string[10]",
-				name: "usernames",
+				name: "sessionUsernames",
 				type: "string[10]",
 			},
 		],
@@ -350,6 +372,25 @@ export const COOKIE_CLICKER_ABI = [
 				internalType: "uint256",
 				name: "",
 				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "player",
+				type: "address",
+			},
+		],
+		name: "getUsername",
+		outputs: [
+			{
+				internalType: "string",
+				name: "",
+				type: "string",
 			},
 		],
 		stateMutability: "view",
@@ -404,11 +445,6 @@ export const COOKIE_CLICKER_ABI = [
 				name: "duration",
 				type: "uint256",
 			},
-			{
-				internalType: "string",
-				name: "username",
-				type: "string",
-			},
 		],
 		stateMutability: "view",
 		type: "function",
@@ -421,6 +457,25 @@ export const COOKIE_CLICKER_ABI = [
 				internalType: "uint256",
 				name: "",
 				type: "uint256",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+		],
+		name: "usernames",
+		outputs: [
+			{
+				internalType: "string",
+				name: "",
+				type: "string",
 			},
 		],
 		stateMutability: "view",

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Cookie, Clock, Trophy, Zap, History } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ interface GameStatsProps {
 	onHistoryClick?: () => void;
 }
 
-export function GameStats({
+export const GameStats = memo(function GameStats({
 	bestScore,
 	bestSession,
 	sessionCount,
@@ -75,4 +76,4 @@ export function GameStats({
 			</div>
 		</Card>
 	);
-}
+});

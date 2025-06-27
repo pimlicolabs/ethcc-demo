@@ -1,7 +1,5 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +8,36 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { validateUsername } from "@/lib/username";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+export const validateUsername = (
+	username: string,
+): { isValid: boolean; error?: string } => {
+	if (!username.trim()) {
+		return { isValid: false, error: "Username cannot be empty" };
+	}
+
+	if (username.length < 2) {
+		return { isValid: false, error: "Username must be at least 2 characters" };
+	}
+
+	if (username.length > 20) {
+		return {
+			isValid: false,
+			error: "Username must be less than 20 characters",
+		};
+	}
+
+	if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+		return {
+			isValid: false,
+			error: "Username can only contain letters, numbers, underscore, and dash",
+		};
+	}
+
+	return { isValid: true };
+};
 
 interface UsernamePromptProps {
 	isOpen: boolean;
@@ -18,7 +45,7 @@ interface UsernamePromptProps {
 	onCancel: () => void;
 }
 
-export function UsernamePrompt({
+export const UsernamePrompt = memo(function UsernamePrompt({
 	isOpen,
 	onSubmit,
 	onCancel,
@@ -58,10 +85,10 @@ export function UsernamePrompt({
 					<div className="grid gap-2">
 						<Label htmlFor="username">Username</Label>
 						<Input
-							id="username"
+							id={`username-${Math.random()}`}
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
-							onKeyPress={handleKeyPress}
+							onKeyDown={handleKeyPress}
 							placeholder="Enter username..."
 							maxLength={20}
 							autoFocus
@@ -83,4 +110,4 @@ export function UsernamePrompt({
 			</DialogContent>
 		</Dialog>
 	);
-}
+});

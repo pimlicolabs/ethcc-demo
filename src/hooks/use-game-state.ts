@@ -1,5 +1,5 @@
 import confetti from "canvas-confetti";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 
 export interface Upgrade {
 	count: number;
@@ -27,25 +27,23 @@ export function useGameState() {
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [lastActivityTime, setLastActivityTime] = useState<number | null>(null);
 
-	// // Calculate total CPS whenever upgrades change
-	// useEffect(() => {
-	// 	const totalCps = Object.entries(upgrades).reduce(
-	// 		(total, [_, upgrade]) => total + upgrade.count * upgrade.cps,
-	// 		0,
-	// 	);
-	// 	setCookiesPerSecond(Number(totalCps.toFixed(1)));
-	// }, [upgrades]);
-
-	// Auto-increment cookies based on CPS
+	// Calculate total CPS whenever upgrades change
 	useEffect(() => {
-		if (!startTime) return;
-		const interval = setInterval(() => {
-			const now = Date.now();
-			const elapsedSeconds = (now - startTime) / 1000;
-			setCookiesPerSecond(Number((cookies / elapsedSeconds).toFixed(1)));
-		}, 100);
-		return () => clearInterval(interval);
-	}, [cookies, startTime]);
+		const totalCps = Object.entries(upgrades).reduce(
+			(total, [_, upgrade]) => total + upgrade.count * upgrade.cps,
+			0,
+		);
+		setCookiesPerSecond(Number(totalCps.toFixed(1)));
+	}, [upgrades]);
+
+	// Calculate CPS based on time elapsed (only for display purposes)
+	const currentCPS = useMemo(() => {
+		if (!startTime || !isPlaying) return cookiesPerSecond;
+		const elapsedSeconds = (Date.now() - startTime) / 1000;
+		return elapsedSeconds > 0
+			? Number((cookies / elapsedSeconds).toFixed(1))
+			: 0;
+	}, [cookies, startTime, isPlaying, cookiesPerSecond]);
 
 	// Calculate auto-upgrades based on best score
 	const calculateAutoUpgrades = useCallback((score: number) => {
@@ -158,15 +156,15 @@ export function useGameState() {
 		return Math.floor(Date.now() - startTime);
 	}, [startTime]);
 
-	const formatNumber = (num: number) => {
+	const formatNumber = useCallback((num: number) => {
 		if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
 		if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
 		return Math.floor(num).toString();
-	};
+	}, []);
 
 	return {
 		cookies,
-		cookiesPerSecond,
+		cookiesPerSecond: currentCPS,
 		upgrades,
 		isPlaying,
 		lastActivityTime,
