@@ -124,7 +124,7 @@ export function CookieClicker() {
 	// Get explorer URL for current chain
 	const getExplorerUrl = (txHash: string) => {
 		const baseUrl = CHAIN_EXPLORERS[chainId];
-		return baseUrl ? `${baseUrl}/tx/${txHash}` : null;
+		return baseUrl ? `${baseUrl}/tx/${txHash}` : undefined;
 	};
 
 	// Hide "Try again" tooltip when user starts playing again

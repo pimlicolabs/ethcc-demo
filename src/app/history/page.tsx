@@ -2,12 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Clock, Trophy } from "lucide-react";
 import { useContractInteractions } from "@/hooks/use-contract-interactions";
-import { useState } from "react";
 import moment from "moment";
 
 export default function HistoryPage() {
