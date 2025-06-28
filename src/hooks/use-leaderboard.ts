@@ -8,6 +8,7 @@ import {
 export interface LeaderboardEntry {
 	address: string;
 	score: number;
+	duration: number;
 	username?: string;
 }
 
@@ -42,6 +43,7 @@ export function useLeaderboard() {
 				.map((address, index) => ({
 					address: address as string,
 					score: Number(leaderboardData[1][index]),
+					duration: Number(leaderboardData[3][index]),
 					username: leaderboardData[4][index] || undefined,
 				}))
 				.filter(

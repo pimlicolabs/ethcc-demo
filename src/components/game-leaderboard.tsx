@@ -66,7 +66,12 @@ export const GameLeaderboard = memo(function GameLeaderboard({
 								<div className="font-semibold text-sm">
 									{formatNumber(player.score)}
 								</div>
-								<div className="text-xs text-muted-foreground">cookies</div>
+								<div className="text-xs text-muted-foreground">
+									{player.duration > 0 
+										? `${(player.score / (player.duration / 1000)).toFixed(1)} CPS`
+										: "0 CPS"
+									}
+								</div>
 							</div>
 						</div>
 					))}
