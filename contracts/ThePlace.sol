@@ -11,8 +11,6 @@ contract ThePlace {
         bool exists;
     }
 
-    // Grid size (7x7 = 49 spots)
-    uint8 public constant GRID_SIZE = 7;
     
     // Mapping from address to their company placement
     mapping(address => CompanyPlacement) public userPlacements;
@@ -44,8 +42,7 @@ contract ThePlace {
 
     // Helper function to convert x,y coordinates to single position ID
     function getPositionId(uint8 x, uint8 y) public pure returns (uint256) {
-        require(x < GRID_SIZE && y < GRID_SIZE, "Position out of bounds");
-        return uint256(y) * GRID_SIZE + uint256(x);
+        return (uint256(y) << 8) | uint256(x);
     }
 
     // Check if a position is available
@@ -174,11 +171,11 @@ contract ThePlace {
             allUsers.push(msg.sender);
         }
 
-        // Check if new position is available (unless it's the user's current position)
+        // Check if new position is available or if user owns the position
+        address currentOwner = positionToUser[newPositionId];
         require(
-            positionToUser[newPositionId] == address(0) || 
-            positionToUser[newPositionId] == msg.sender,
-            "Position already occupied"
+            currentOwner == address(0) || currentOwner == msg.sender,
+            "Position owned by another user"
         );
 
         // Update mappings
