@@ -25,7 +25,7 @@ Batua.create({
 	boosted: true,
 	rpc: {
 		transports: {
-			[arbitrum.id]: http("https://arbitrum.drpc.org"),
+			[arbitrum.id]: http(process.env.NEXT_PUBLIC_RPC_URL || "https://arbitrum.drpc.org"),
 			//			[baseSepolia.id]: http("https://base-sepolia-rpc.publicnode.com"),
 			//			[base.id]: http("https://base-rpc.publicnode.com"),
 		},
@@ -83,7 +83,7 @@ export const config = createConfig({
 	ssr: true,
 	connectors: [injected()],
 	transports: {
-		[arbitrum.id]: http("https://arbitrum.drpc.org"),
+		[arbitrum.id]: http(process.env.NEXT_PUBLIC_RPC_URL || "https://arbitrum.drpc.org"),
 		// [mainnet.id]: http(),
 		// [base.id]: http(),
 		// [polygon.id]: http(),
