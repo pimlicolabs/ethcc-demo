@@ -1,8 +1,9 @@
-import { arbitrumSepolia, sepolia } from "viem/chains";
+import { arbitrum, arbitrumSepolia, sepolia } from "viem/chains";
 
 export const COOKIE_CLICKER_ADDRESS = {
 	[sepolia.id]: "0x35F280c2233d64be5BCfAf3A9F3A4273829b1722",
 	[arbitrumSepolia.id]: "0x286837e8b533fec4ed4f612b000F729c55bC658A",
+	[arbitrum.id]: "0x49Fb6010de1E079cf1BA31878d4f3A2E7FBCBAd1",
 } as const;
 
 export const COOKIE_CLICKER_ABI = [

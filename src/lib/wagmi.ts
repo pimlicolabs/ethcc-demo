@@ -1,7 +1,6 @@
 import { createConfig, http } from "wagmi";
 import {
-	// arbitrum,
-	arbitrumSepolia,
+	arbitrum,
 	// base,
 	// baseSepolia,
 	// bsc,
@@ -20,21 +19,21 @@ import { Batua } from "@/lib/batua";
 // Initialize Batua wallet - it will appear as a connector automatically
 Batua.create({
 	// chains: [sepolia, baseSepolia, base],
-	chains: [arbitrumSepolia],
+	chains: [arbitrum],
 	dappName: "Pimlico",
 	walletName: "Batua",
 	boosted: true,
 	rpc: {
 		transports: {
-			[arbitrumSepolia.id]: http("https://arbitrum-sepolia-rpc.publicnode.com"),
+			[arbitrum.id]: http("https://arbitrum.drpc.org"),
 			//			[baseSepolia.id]: http("https://base-sepolia-rpc.publicnode.com"),
 			//			[base.id]: http("https://base-rpc.publicnode.com"),
 		},
 	},
 	bundler: {
 		transports: {
-			[arbitrumSepolia.id]: http(
-				`https://api.pimlico.io/v2/${arbitrumSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY || ""}`,
+			[arbitrum.id]: http(
+				`https://api.pimlico.io/v2/${arbitrum.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY || ""}`,
 			),
 			// [baseSepolia.id]: http(
 			// 	`https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY || ""}`,
@@ -48,8 +47,8 @@ Batua.create({
 	// ...(process.env.NEXT_PUBLIC_PIMLICO_API_KEY && {
 	// 	paymaster: {
 	// 		transports: {
-	// 			[arbitrumSepolia.id]: http(
-	// 				`https://api.pimlico.io/v2/${arbitrumSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
+	// 			[arbitrum.id]: http(
+	// 				`https://api.pimlico.io/v2/${arbitrum.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
 	// 			),
 	// 			// [baseSepolia.id]: http(
 	// 			// 	`https://api.pimlico.io/v2/${baseSepolia.id}/rpc?apikey=${process.env.NEXT_PUBLIC_PIMLICO_API_KEY}`,
@@ -79,12 +78,12 @@ export const config = createConfig({
 		// worldchain,
 		// mantle,
 		// celo,
-		arbitrumSepolia,
+		arbitrum,
 	],
 	ssr: true,
 	connectors: [injected()],
 	transports: {
-		[arbitrumSepolia.id]: http("https://arbitrum-sepolia-rpc.publicnode.com"),
+		[arbitrum.id]: http("https://arbitrum.drpc.org"),
 		// [mainnet.id]: http(),
 		// [base.id]: http(),
 		// [polygon.id]: http(),

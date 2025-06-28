@@ -156,6 +156,15 @@ export function CookieClicker() {
 		clickCookie(bestScore);
 	}, [clickCookie, bestScore]);
 
+	// Handle touch events for animation
+	const handleTouchStart = useCallback((e: React.TouchEvent) => {
+		e.currentTarget.style.transform = 'scale(0.9)';
+	}, []);
+
+	const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+		e.currentTarget.style.transform = 'scale(1)';
+	}, []);
+
 	// Handle starting the game
 	const handleStartGame = () => {
 		setShowInstructions(false);
@@ -253,9 +262,14 @@ export function CookieClicker() {
 			<div className="flex justify-center relative">
 				<Button
 					onClick={handleCookieClick}
+					onTouchStart={handleTouchStart}
+					onTouchEnd={handleTouchEnd}
 					size="lg"
-					className="w-32 h-32 rounded-full text-4xl bg-primary hover:bg-primary/90 active:scale-95 transition-transform touch-manipulation"
-					style={{ WebkitTapHighlightColor: "transparent" }}
+					className="w-40 h-40 rounded-full text-9xl bg-transparent hover:bg-transparent transition-all duration-150 touch-manipulation select-none shadow-lg border-0 p-0"
+					style={{
+						WebkitTapHighlightColor: "transparent",
+						filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.3))",
+					}}
 				>
 					🍪
 				</Button>
