@@ -157,12 +157,12 @@ export function CookieClicker() {
 	}, [clickCookie, bestScore]);
 
 	// Handle touch events for animation
-	const handleTouchStart = useCallback((e: React.TouchEvent) => {
-		e.currentTarget.style.transform = 'scale(0.9)';
+	const handleTouchStart = useCallback((e: React.TouchEvent<HTMLButtonElement>) => {
+		(e.currentTarget as HTMLElement).style.transform = 'scale(0.9)';
 	}, []);
 
-	const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-		e.currentTarget.style.transform = 'scale(1)';
+	const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLButtonElement>) => {
+		(e.currentTarget as HTMLElement).style.transform = 'scale(1)';
 	}, []);
 
 	// Handle starting the game
@@ -264,6 +264,9 @@ export function CookieClicker() {
 					onClick={handleCookieClick}
 					onTouchStart={handleTouchStart}
 					onTouchEnd={handleTouchEnd}
+					onMouseDown={handleTouchStart}
+					onMouseUp={handleTouchEnd}
+					onMouseLeave={handleTouchEnd}
 					size="lg"
 					className="w-40 h-40 rounded-full text-9xl bg-transparent hover:bg-transparent transition-all duration-150 touch-manipulation select-none shadow-lg border-0 p-0"
 					style={{
