@@ -1,5 +1,5 @@
 import { Bug } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { UserOperation } from "viem/account-abstraction";
 import { CopyAddress } from "@/components/batua/CopyAddress";
 import {
@@ -7,13 +7,27 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import type { Call } from "@/lib/batua/type";
+import { COOKIE_CLICKER_ADDRESS } from "@/lib/contracts/cookie-clicker-abi";
 
 export const SendCallsHeader = ({
 	userOperation,
+	calls,
 }: {
 	userOperation: UserOperation<"0.7"> | null;
+	calls: Call[];
 }) => {
 	const [senderHost, setSenderHost] = useState("");
+
+	console.log(calls);
+
+	const callToCookieClicker = useMemo(
+		() =>
+			calls.find(
+				(call) => call.to === "0x49Fb6010de1E079cf1BA31878d4f3A2E7FBCBAd1",
+			),
+		[calls],
+	);
 
 	useEffect(() => {
 		setSenderHost(window.location.host);
@@ -30,7 +44,7 @@ export const SendCallsHeader = ({
 			<DialogHeader className="gap-0 border-b pb-2">
 				<div>
 					<DialogTitle className="text-xl font-semibold flex items-center justify-start">
-						Send Transaction
+						{callToCookieClicker ? "Save score" : "Place logo"}
 					</DialogTitle>
 					<DialogDescription className="text-sm w-full flex items-center justify-between">
 						<span>{senderHost}</span>

@@ -18,7 +18,7 @@ import { useGasCost } from "@/hooks/batua/useGasCost";
 import { useSendCallsRequest } from "@/hooks/batua/useSendCallsRequest";
 import { useSmartAccount } from "@/hooks/batua/useSmartAccount";
 import { useUserOperation } from "@/hooks/batua/useUserOperation";
-import type { Internal, QueuedRequest } from "@/lib/batua/type";
+import type { Call, Internal, QueuedRequest } from "@/lib/batua/type";
 
 export const SendCalls = ({
 	onComplete,
@@ -159,7 +159,10 @@ export const SendCalls = ({
 				className={`sm:max-w-[400px] p-0 flex justify-start gap-0 flex-col ${isLoading ? "max-h-[370px] overflow-hidden" : "max-h-[75vh] overflow-y-auto"} transition-[max-height] duration-500 ease-in-out`}
 			>
 				<div className="p-6 pb-0">
-					<SendCallsHeader userOperation={userOperation} />
+					<SendCallsHeader
+						calls={request.params[0].calls as Call[]}
+						userOperation={userOperation}
+					/>
 
 					{error && (
 						<Alert variant="destructive" className="mb-5">

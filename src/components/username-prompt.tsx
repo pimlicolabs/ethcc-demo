@@ -94,15 +94,15 @@ export const UsernamePrompt = memo(function UsernamePrompt({
 							autoFocus
 						/>
 						{error && <p className="text-sm text-destructive">{error}</p>}
-						<p className="text-xs text-muted-foreground">
+						{/* <p className="text-xs text-muted-foreground">
 							2-20 characters, letters, numbers, underscore, and dash only
-						</p>
+						</p> */}
 					</div>
 				</div>
 				<DialogFooter>
-					<Button variant="outline" onClick={onCancel}>
+					{/* <Button variant="outline" onClick={onCancel}>
 						Cancel
-					</Button>
+					</Button> */}
 					<Button onClick={handleSubmit} disabled={!username.trim()}>
 						Save Username
 					</Button>
