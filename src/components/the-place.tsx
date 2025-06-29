@@ -376,11 +376,9 @@ export function ThePlace() {
 					</p>
 				</div>
 
-				{(error || contractError) && (
+				{error && (
 					<Alert variant="destructive">
-						<AlertDescription>
-							{error || contractError?.message}
-						</AlertDescription>
+						<AlertDescription>{error}</AlertDescription>
 					</Alert>
 				)}
 
