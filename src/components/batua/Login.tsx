@@ -321,36 +321,6 @@ export const Login = ({
 					<div className="space-y-5">
 						<div className="space-y-2.5">
 							<h3 className="text-sm font-medium flex items-center gap-1">
-								Already have a {walletName}?
-							</h3>
-							<Button
-								className="w-full h-11 flex justify-center items-center gap-2"
-								variant="outline"
-								onClick={signIn}
-								disabled={isLoading !== null}
-							>
-								{isLoading === "signin" ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<Fingerprint className="h-4 w-4 text-primary" />
-								)}
-								Sign in with passkey
-							</Button>
-						</div>
-
-						<div className="relative py-1">
-							<div className="absolute inset-0 flex items-center">
-								<Separator className="w-full" />
-							</div>
-							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-background px-2 text-muted-foreground">
-									Or
-								</span>
-							</div>
-						</div>
-
-						<div className="space-y-2.5">
-							<h3 className="text-sm font-medium flex items-center gap-1">
 								New to {walletName}?
 							</h3>
 							<Button
@@ -367,6 +337,34 @@ export const Login = ({
 									<LogIn className="h-4 w-4" />
 								)}
 								Create new wallet
+							</Button>
+						</div>
+						<div className="relative py-1">
+							<div className="absolute inset-0 flex items-center">
+								<Separator className="w-full" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-background px-2 text-muted-foreground">
+									Or
+								</span>
+							</div>
+						</div>
+						<div className="space-y-2.5">
+							<h3 className="text-sm font-medium flex items-center gap-1">
+								Already have a {walletName}?
+							</h3>
+							<Button
+								className="w-full h-11 flex justify-center items-center gap-2"
+								variant="outline"
+								onClick={signIn}
+								disabled={isLoading !== null}
+							>
+								{isLoading === "signin" ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									<Fingerprint className="h-4 w-4 text-primary" />
+								)}
+								Sign in with passkey
 							</Button>
 						</div>
 					</div>
