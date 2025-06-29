@@ -157,26 +157,41 @@ export function CookieClicker() {
 	}, [clickCookie, bestScore]);
 
 	// Handle touch events for animation
-	const handleTouchStart = useCallback((e: React.TouchEvent<HTMLButtonElement>) => {
-		(e.currentTarget as HTMLElement).style.transform = 'scale(0.9)';
-	}, []);
+	const handleTouchStart = useCallback(
+		(e: React.TouchEvent<HTMLButtonElement>) => {
+			(e.currentTarget as HTMLElement).style.transform = "scale(0.9)";
+		},
+		[],
+	);
 
-	const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLButtonElement>) => {
-		(e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-	}, []);
+	const handleTouchEnd = useCallback(
+		(e: React.TouchEvent<HTMLButtonElement>) => {
+			(e.currentTarget as HTMLElement).style.transform = "scale(1)";
+		},
+		[],
+	);
 
 	// Handle mouse events for animation
-	const handleMouseDown = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		(e.currentTarget as HTMLElement).style.transform = 'scale(0.9)';
-	}, []);
+	const handleMouseDown = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>) => {
+			(e.currentTarget as HTMLElement).style.transform = "scale(0.9)";
+		},
+		[],
+	);
 
-	const handleMouseUp = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		(e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-	}, []);
+	const handleMouseUp = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>) => {
+			(e.currentTarget as HTMLElement).style.transform = "scale(1)";
+		},
+		[],
+	);
 
-	const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		(e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-	}, []);
+	const handleMouseLeave = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>) => {
+			(e.currentTarget as HTMLElement).style.transform = "scale(1)";
+		},
+		[],
+	);
 
 	// Handle starting the game
 	const handleStartGame = () => {

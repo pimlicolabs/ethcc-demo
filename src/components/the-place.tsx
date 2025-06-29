@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useId } from "react";
+import { useEffect, useRef, useState, useId, useCallback } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Trophy, ExternalLink, AlertCircle } from "lucide-react";
+import { Loader2, Trophy, ExternalLink, AlertCircle } from "lucide-react";
 import { useChainId } from "wagmi";
 import { useThePlaceContract } from "@/hooks/use-the-place-contract";
 import { containsBannedContent, isValidUrl } from "@/lib/content-validation";
@@ -45,10 +45,12 @@ export function ThePlace() {
 		placeCompany,
 	} = useThePlaceContract();
 
-	// Canvas configuration for mobile-friendly 7x7 grid (49 spots, close to 50)
-	const GRID_SIZE = 7;
+	// Dynamic grid size state - starts at 3x3, expands when filled
+	const [gridSize, setGridSize] = useState(3);
 	const CELL_SIZE = 45; // Mobile-friendly size
-	const CANVAS_SIZE = GRID_SIZE * CELL_SIZE;
+	const CANVAS_SIZE = gridSize * CELL_SIZE;
+	const MAX_GRID_SIZE = 10;
+	const TOTAL_SPOTS = gridSize * gridSize;
 
 	// Chain ID to explorer URL mapping
 	const CHAIN_EXPLORERS: Record<number, string> = {
@@ -75,7 +77,129 @@ export function ThePlace() {
 		}));
 
 		setLogos(convertedLogos);
-	}, [placements]);
+
+		// Check if we need to expand the grid
+		if (convertedLogos.length > 0) {
+			// Find the maximum x and y coordinates
+			const maxX = Math.max(...convertedLogos.map((logo) => logo.x));
+			const maxY = Math.max(...convertedLogos.map((logo) => logo.y));
+			const requiredSize = Math.max(maxX, maxY) + 1;
+
+			// Update grid size if needed
+			if (requiredSize > gridSize) {
+				setGridSize(Math.min(requiredSize, MAX_GRID_SIZE));
+			}
+		}
+	}, [placements, gridSize]);
+
+	// Get explorer URL for current chain
+	const getExplorerUrl = (txHash: string) => {
+		const baseUrl = CHAIN_EXPLORERS[chainId];
+		return baseUrl ? `${baseUrl}/tx/${txHash}` : undefined;
+	};
+
+	const fetchCompanyLogo = useCallback(
+		async (url: string): Promise<{ logoUrl: string; companyName: string }> => {
+			try {
+				// Normalize URL
+				const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
+				const domain = new URL(normalizedUrl).hostname;
+
+				// Try multiple logo fetching strategies
+				const logoSources = [
+					`https://logo.clearbit.com/${domain}`,
+					`https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+					`https://${domain}/favicon.ico`,
+				];
+
+				let logoFound = false;
+				for (const logoUrl of logoSources) {
+					try {
+						const response = await fetch(
+							`/api/proxy-image?url=${encodeURIComponent(logoUrl)}`,
+						);
+						if (response.ok) {
+							logoFound = true;
+							return {
+								logoUrl: logoUrl,
+								companyName: domain.replace("www.", ""),
+							};
+						}
+					} catch {
+						// Continue to next logo source
+					}
+				}
+
+				// If no logos were found, throw an error to prevent transaction
+				if (!logoFound) {
+					throw new Error(
+						`Unable to fetch logo for ${domain}. Please try a different company URL.`,
+					);
+				}
+
+				// This should not be reached, but keep fallback for safety
+				return {
+					logoUrl: `data:image/svg+xml,${encodeURIComponent(`
+					<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+						<rect width="40" height="40" fill="#3b82f6"/>
+						<text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">
+							${domain.charAt(0).toUpperCase()}
+						</text>
+					</svg>
+				`)}`,
+					companyName: domain.replace("www.", ""),
+				};
+			} catch (error) {
+				if (error instanceof Error) {
+					throw error;
+				}
+				throw new Error("Invalid URL format");
+			}
+		},
+		[],
+	);
+
+	const drawLogos = useCallback(
+		(ctx: CanvasRenderingContext2D) => {
+			logos.forEach(async (logo) => {
+				try {
+					// Fetch logo URL if not already set
+					if (!logo.logoUrl) {
+						const { logoUrl } = await fetchCompanyLogo(logo.url);
+						logo.logoUrl = logoUrl;
+					}
+
+					const img = new Image();
+					img.crossOrigin = "anonymous";
+					img.onload = () => {
+						ctx.drawImage(
+							img,
+							logo.x * CELL_SIZE + 2,
+							logo.y * CELL_SIZE + 2,
+							CELL_SIZE - 4,
+							CELL_SIZE - 4,
+						);
+
+						// Add user indicator for current user's placement
+						if (logo.address === address) {
+							ctx.strokeStyle = "#10b981";
+							ctx.lineWidth = 2;
+							ctx.strokeRect(
+								logo.x * CELL_SIZE + 1,
+								logo.y * CELL_SIZE + 1,
+								CELL_SIZE - 2,
+								CELL_SIZE - 2,
+							);
+						}
+					};
+					img.src = logo.logoUrl;
+				} catch (error) {
+					console.error("Failed to load logo:", error);
+				}
+			});
+		},
+		[logos, address, fetchCompanyLogo],
+	);
 
 	// Initialize canvas
 	useEffect(() => {
@@ -94,52 +218,7 @@ export function ThePlace() {
 		// Clear canvas and draw logos only (no grid)
 		ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 		drawLogos(ctx);
-	}, [logos, userPlacement, isConfirmed, CANVAS_SIZE]);
-
-	// Get explorer URL for current chain
-	const getExplorerUrl = (txHash: string) => {
-		const baseUrl = CHAIN_EXPLORERS[chainId];
-		return baseUrl ? `${baseUrl}/tx/${txHash}` : undefined;
-	};
-
-	const drawLogos = (ctx: CanvasRenderingContext2D) => {
-		logos.forEach(async (logo) => {
-			try {
-				// Fetch logo URL if not already set
-				if (!logo.logoUrl) {
-					const { logoUrl } = await fetchCompanyLogo(logo.url);
-					logo.logoUrl = logoUrl;
-				}
-
-				const img = new Image();
-				img.crossOrigin = "anonymous";
-				img.onload = () => {
-					ctx.drawImage(
-						img,
-						logo.x * CELL_SIZE + 2,
-						logo.y * CELL_SIZE + 2,
-						CELL_SIZE - 4,
-						CELL_SIZE - 4,
-					);
-
-					// Add user indicator for current user's placement
-					if (logo.address === address) {
-						ctx.strokeStyle = "#10b981";
-						ctx.lineWidth = 2;
-						ctx.strokeRect(
-							logo.x * CELL_SIZE + 1,
-							logo.y * CELL_SIZE + 1,
-							CELL_SIZE - 2,
-							CELL_SIZE - 2,
-						);
-					}
-				};
-				img.src = logo.logoUrl;
-			} catch (error) {
-				console.error("Failed to load logo:", error);
-			}
-		});
-	};
+	}, [userPlacement, isConfirmed, CANVAS_SIZE, drawLogos]);
 
 	// Find a random available position
 	const findRandomAvailablePosition = (): { x: number; y: number } | null => {
@@ -149,8 +228,8 @@ export function ThePlace() {
 
 		const availablePositions: { x: number; y: number }[] = [];
 
-		for (let x = 0; x < GRID_SIZE; x++) {
-			for (let y = 0; y < GRID_SIZE; y++) {
+		for (let x = 0; x < gridSize; x++) {
+			for (let y = 0; y < gridSize; y++) {
 				if (!occupiedPositions.has(`${x},${y}`)) {
 					availablePositions.push({ x, y });
 				}
@@ -190,66 +269,6 @@ export function ThePlace() {
 				? clickedLogo.url
 				: `https://${clickedLogo.url}`;
 			window.open(url, "_blank", "noopener,noreferrer");
-		}
-	};
-
-	const fetchCompanyLogo = async (
-		url: string,
-	): Promise<{ logoUrl: string; companyName: string }> => {
-		try {
-			// Normalize URL
-			const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
-			const domain = new URL(normalizedUrl).hostname;
-
-			// Try multiple logo fetching strategies
-			const logoSources = [
-				`https://logo.clearbit.com/${domain}`,
-				`https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
-				`https://${domain}/favicon.ico`,
-			];
-
-			let logoFound = false;
-			for (const logoUrl of logoSources) {
-				try {
-					const response = await fetch(
-						`/api/proxy-image?url=${encodeURIComponent(logoUrl)}`,
-					);
-					if (response.ok) {
-						logoFound = true;
-						return {
-							logoUrl: logoUrl,
-							companyName: domain.replace("www.", ""),
-						};
-					}
-				} catch {
-					// Continue to next logo source
-				}
-			}
-
-			// If no logos were found, throw an error to prevent transaction
-			if (!logoFound) {
-				throw new Error(
-					`Unable to fetch logo for ${domain}. Please try a different company URL.`,
-				);
-			}
-
-			// This should not be reached, but keep fallback for safety
-			return {
-				logoUrl: `data:image/svg+xml,${encodeURIComponent(`
-					<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-						<rect width="40" height="40" fill="#3b82f6"/>
-						<text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">
-							${domain.charAt(0).toUpperCase()}
-						</text>
-					</svg>
-				`)}`,
-				companyName: domain.replace("www.", ""),
-			};
-		} catch (error) {
-			if (error instanceof Error) {
-				throw error;
-			}
-			throw new Error("Invalid URL format");
 		}
 	};
 
@@ -312,9 +331,18 @@ export function ThePlace() {
 			}
 
 			// Find a random available position
-			const randomPosition = findRandomAvailablePosition();
-			if (!randomPosition) {
-				setError("Canvas is full! No available positions.");
+			let randomPosition = findRandomAvailablePosition();
+			if (!randomPosition && gridSize < MAX_GRID_SIZE) {
+				// Expand grid if current one is full and we haven't reached max size
+				const newSize = Math.min(gridSize + 2, MAX_GRID_SIZE);
+				setGridSize(newSize);
+				// Try finding position in expanded grid
+				randomPosition = {
+					x: Math.floor(Math.random() * newSize),
+					y: Math.floor(Math.random() * newSize),
+				};
+			} else if (!randomPosition) {
+				setError("Canvas is full! Maximum size reached.");
 				setIsLoading(false);
 				return;
 			}
@@ -402,7 +430,7 @@ export function ThePlace() {
 									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
 									{isConfirming ? "Confirming..." : "Adding Logo..."}
 								</>
-							) : logos.length >= 49 ? (
+							) : logos.length >= TOTAL_SPOTS && gridSize >= MAX_GRID_SIZE ? (
 								"🎉 Canvas Full!"
 							) : (
 								<>
@@ -460,7 +488,8 @@ export function ThePlace() {
 							htmlFor={liveCanvasId}
 							className="text-sm font-medium mb-2 block"
 						>
-							Live Canvas ({logos.length}/49 spots filled)
+							Live Canvas ({logos.length}/{TOTAL_SPOTS} spots filled, {gridSize}
+							x{gridSize} grid)
 						</label>
 						<div className="flex justify-center">
 							<canvas
@@ -485,7 +514,9 @@ export function ThePlace() {
 
 			{logos.length > 0 && (
 				<Card className="p-4">
-					<h3 className="font-medium mb-3">Companies ({logos.length}/49)</h3>
+					<h3 className="font-medium mb-3">
+						Companies ({logos.length}/{TOTAL_SPOTS})
+					</h3>
 					<div className="space-y-2 max-h-40 overflow-y-auto">
 						{logos.map((logo) => (
 							<div
