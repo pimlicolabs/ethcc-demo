@@ -193,6 +193,16 @@ export function ThePlace() {
 	const drawLogos = useCallback(
 		(ctx: CanvasRenderingContext2D) => {
 			logos.forEach((logo) => {
+				// Check if position is within bounds
+				if (
+					logo.x < 0 ||
+					logo.x >= gridSize ||
+					logo.y < 0 ||
+					logo.y >= gridSize
+				) {
+					return;
+				}
+
 				if (!logo.logoUrl) return; // Skip if no logoUrl
 
 				try {
@@ -220,15 +230,49 @@ export function ThePlace() {
 						}
 					};
 					img.onerror = () => {
-						// console.error("Failed to load logo:", logo.logoUrl);
+						// Draw fallback when image fails to load
+						if (!ctx) return;
+
+						// Draw background
+						ctx.fillStyle = "#3b82f6";
+						ctx.fillRect(
+							logo.x * CELL_SIZE + 2,
+							logo.y * CELL_SIZE + 2,
+							CELL_SIZE - 4,
+							CELL_SIZE - 4,
+						);
+
+						// Draw company initial
+						ctx.fillStyle = "white";
+						ctx.font = "bold 16px Arial";
+						ctx.textAlign = "center";
+						ctx.textBaseline = "middle";
+						ctx.fillText(
+							logo.companyName.charAt(0).toUpperCase(),
+							logo.x * CELL_SIZE + CELL_SIZE / 2,
+							logo.y * CELL_SIZE + CELL_SIZE / 2,
+						);
+
+						// Add user indicator for current user's placement
+						if (logo.address === address) {
+							ctx.strokeStyle = "#10b981";
+							ctx.lineWidth = 2;
+							ctx.strokeRect(
+								logo.x * CELL_SIZE + 1,
+								logo.y * CELL_SIZE + 1,
+								CELL_SIZE - 2,
+								CELL_SIZE - 2,
+							);
+						}
 					};
-					img.src = logo.logoUrl;
+					// Load image through proxy to avoid CORS issues
+					img.src = `/api/proxy-image?url=${encodeURIComponent(logo.logoUrl)}`;
 				} catch (error) {
-					console.error("Failed to load logo:", error);
+					// Silently skip on error
 				}
 			});
 		},
-		[logos, address],
+		[logos, address, gridSize, CANVAS_SIZE, CELL_SIZE],
 	);
 
 	// Initialize canvas
@@ -396,6 +440,22 @@ export function ThePlace() {
 		}
 	};
 
+	// Show loading state while checking contract
+	if (isContractLoading) {
+		return (
+			<div className="w-full max-w-md mx-auto space-y-6">
+				<div className="text-center">
+					<p className="text-sm text-muted-foreground">
+						Checking your placement...
+					</p>
+				</div>
+				<div className="flex justify-center">
+					<Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+				</div>
+			</div>
+		);
+	}
+
 	// Show initial URL input form if user hasn't placed anything yet
 	if (!userPlacement && !isConfirmed) {
 		return (
@@ -461,10 +521,7 @@ export function ThePlace() {
 							) : logos.length >= TOTAL_SPOTS && gridSize >= MAX_GRID_SIZE ? (
 								"🎉 Canvas Full!"
 							) : (
-								<>
-									{/* <Plus className="w-4 h-4 mr-2" /> */}
-									{isConnected ? "Submit" : "Connect Wallet First"}
-								</>
+								<>{isConnected ? "Submit" : "Connect Wallet First"}</>
 							)}
 						</Button>
 					</div>
