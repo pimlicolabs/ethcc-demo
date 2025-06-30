@@ -546,39 +546,45 @@ export function ThePlace() {
 						Companies ({logos.length}/{TOTAL_SPOTS})
 					</h3>
 					<div className="space-y-2">
-						{logos.map((logo) => (
-							<div key={logo.id} className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									{logo.logoUrl ? (
-										<img
-											src={logo.logoUrl}
-											alt={logo.companyName}
-											width={24}
-											height={24}
-											className="rounded"
-										/>
-									) : (
-										<div className="w-6 h-6 bg-muted rounded flex items-center justify-center text-xs">
-											{logo.companyName.charAt(0).toUpperCase()}
-										</div>
-									)}
-									<div className="flex flex-col">
-										<div className="text-base">
-											<UsernameOrAddress
-												address={logo.address}
-												isCurrentUser={logo.address === address}
+						{logos
+							.slice()
+							.reverse()
+							.map((logo) => (
+								<div
+									key={logo.id}
+									className="flex items-center justify-between"
+								>
+									<div className="flex items-center gap-2">
+										{logo.logoUrl ? (
+											<img
+												src={logo.logoUrl}
+												alt={logo.companyName}
+												width={24}
+												height={24}
+												className="rounded"
 											/>
+										) : (
+											<div className="w-6 h-6 bg-muted rounded flex items-center justify-center text-xs">
+												{logo.companyName.charAt(0).toUpperCase()}
+											</div>
+										)}
+										<div className="flex flex-col">
+											<div className="text-base">
+												<UsernameOrAddress
+													address={logo.address}
+													isCurrentUser={logo.address === address}
+												/>
+											</div>
+											<span className="text-sm text-muted-foreground">
+												{logo.companyName}
+											</span>
 										</div>
-										<span className="text-sm text-muted-foreground">
-											{logo.companyName}
-										</span>
+									</div>
+									<div className="text-muted-foreground">
+										({logo.x + 1}, {logo.y + 1})
 									</div>
 								</div>
-								<div className="text-muted-foreground">
-									({logo.x + 1}, {logo.y + 1})
-								</div>
-							</div>
-						))}
+							))}
 					</div>
 				</Card>
 			)}
