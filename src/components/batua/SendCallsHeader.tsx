@@ -24,7 +24,7 @@ export const SendCallsHeader = ({
 	const callToCookieClicker = useMemo(
 		() =>
 			calls.find(
-				(call) => call.to === "0x49Fb6010de1E079cf1BA31878d4f3A2E7FBCBAd1",
+				(call) => call.to === "0xBD5AE2C52A24200C6D3aD445b65E1c3242a09E39",
 			),
 		[calls],
 	);
