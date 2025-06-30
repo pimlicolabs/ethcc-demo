@@ -9,6 +9,7 @@ import { Loader2, Trophy, ExternalLink, AlertCircle } from "lucide-react";
 import { useChainId } from "wagmi";
 import { useThePlaceContract } from "@/hooks/use-the-place-contract";
 import { containsBannedContent, isValidUrl } from "@/lib/content-validation";
+import { UsernameOrAddress } from "@/components/username-or-address";
 
 interface CompanyLogo {
 	id: string;
@@ -62,40 +63,6 @@ export function ThePlace() {
 		42161: "https://arbiscan.io",
 		421614: "https://sepolia.arbiscan.io", // Arbitrum Sepolia
 		11155111: "https://sepolia.etherscan.io", // Ethereum Sepolia
-	};
-
-	// Convert blockchain placements to display format
-	useEffect(() => {
-		const convertedLogos: CompanyLogo[] = placements.map((placement) => ({
-			id: `${placement.user}-${placement.timestamp}`,
-			url: placement.companyUrl,
-			logoUrl: "", // Will be fetched when drawing
-			companyName: placement.companyName,
-			x: placement.x,
-			y: placement.y,
-			address: placement.user,
-		}));
-
-		setLogos(convertedLogos);
-
-		// Check if we need to expand the grid
-		if (convertedLogos.length > 0) {
-			// Find the maximum x and y coordinates
-			const maxX = Math.max(...convertedLogos.map((logo) => logo.x));
-			const maxY = Math.max(...convertedLogos.map((logo) => logo.y));
-			const requiredSize = Math.max(maxX, maxY) + 1;
-
-			// Update grid size if needed
-			if (requiredSize > gridSize) {
-				setGridSize(Math.min(requiredSize, MAX_GRID_SIZE));
-			}
-		}
-	}, [placements, gridSize]);
-
-	// Get explorer URL for current chain
-	const getExplorerUrl = (txHash: string) => {
-		const baseUrl = CHAIN_EXPLORERS[chainId];
-		return baseUrl ? `${baseUrl}/tx/${txHash}` : undefined;
 	};
 
 	const fetchCompanyLogo = useCallback(
@@ -159,16 +126,76 @@ export function ThePlace() {
 		[],
 	);
 
+	// Convert blockchain placements to display format
+	useEffect(() => {
+		const fetchAndSetLogos = async () => {
+			const convertedLogos: CompanyLogo[] = await Promise.all(
+				placements.map(async (placement) => {
+					let logoUrl = "";
+					try {
+						const { logoUrl: fetchedUrl } = await fetchCompanyLogo(
+							placement.companyUrl,
+						);
+						logoUrl = fetchedUrl;
+					} catch (error) {
+						console.error(
+							"Failed to fetch logo for",
+							placement.companyName,
+							error,
+						);
+						// Use a fallback logo
+						logoUrl = `data:image/svg+xml,${encodeURIComponent(`
+							<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+								<rect width="40" height="40" fill="#3b82f6"/>
+								<text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">
+									${placement.companyName.charAt(0).toUpperCase()}
+								</text>
+							</svg>
+						`)}`;
+					}
+					return {
+						id: `${placement.user}-${placement.timestamp}`,
+						url: placement.companyUrl,
+						logoUrl,
+						companyName: placement.companyName,
+						x: placement.x,
+						y: placement.y,
+						address: placement.user,
+					};
+				}),
+			);
+
+			setLogos(convertedLogos);
+
+			// Check if we need to expand the grid
+			if (convertedLogos.length > 0) {
+				// Find the maximum x and y coordinates
+				const maxX = Math.max(...convertedLogos.map((logo) => logo.x));
+				const maxY = Math.max(...convertedLogos.map((logo) => logo.y));
+				const requiredSize = Math.max(maxX, maxY) + 1;
+
+				// Update grid size if needed
+				if (requiredSize > gridSize) {
+					setGridSize(Math.min(requiredSize, MAX_GRID_SIZE));
+				}
+			}
+		};
+
+		fetchAndSetLogos();
+	}, [placements, gridSize, fetchCompanyLogo]);
+
+	// Get explorer URL for current chain
+	const getExplorerUrl = (txHash: string) => {
+		const baseUrl = CHAIN_EXPLORERS[chainId];
+		return baseUrl ? `${baseUrl}/tx/${txHash}` : undefined;
+	};
+
 	const drawLogos = useCallback(
 		(ctx: CanvasRenderingContext2D) => {
-			logos.forEach(async (logo) => {
-				try {
-					// Fetch logo URL if not already set
-					if (!logo.logoUrl) {
-						const { logoUrl } = await fetchCompanyLogo(logo.url);
-						logo.logoUrl = logoUrl;
-					}
+			logos.forEach((logo) => {
+				if (!logo.logoUrl) return; // Skip if no logoUrl
 
+				try {
 					const img = new Image();
 					img.crossOrigin = "anonymous";
 					img.onload = () => {
@@ -192,13 +219,16 @@ export function ThePlace() {
 							);
 						}
 					};
+					img.onerror = () => {
+						// console.error("Failed to load logo:", logo.logoUrl);
+					};
 					img.src = logo.logoUrl;
 				} catch (error) {
 					console.error("Failed to load logo:", error);
 				}
 			});
 		},
-		[logos, address, fetchCompanyLogo],
+		[logos, address],
 	);
 
 	// Initialize canvas
@@ -515,24 +545,34 @@ export function ThePlace() {
 					<h3 className="font-medium mb-3">
 						Companies ({logos.length}/{TOTAL_SPOTS})
 					</h3>
-					<div className="space-y-2 max-h-40 overflow-y-auto">
+					<div className="space-y-2">
 						{logos.map((logo) => (
-							<div
-								key={logo.id}
-								className="flex items-center justify-between text-sm"
-							>
+							<div key={logo.id} className="flex items-center justify-between">
 								<div className="flex items-center gap-2">
-									<div className="w-6 h-6 bg-muted rounded flex items-center justify-center text-xs">
-										{logo.companyName.charAt(0).toUpperCase()}
+									{logo.logoUrl ? (
+										<img
+											src={logo.logoUrl}
+											alt={logo.companyName}
+											width={24}
+											height={24}
+											className="rounded"
+										/>
+									) : (
+										<div className="w-6 h-6 bg-muted rounded flex items-center justify-center text-xs">
+											{logo.companyName.charAt(0).toUpperCase()}
+										</div>
+									)}
+									<div className="flex flex-col">
+										<div className="text-base">
+											<UsernameOrAddress
+												address={logo.address}
+												isCurrentUser={logo.address === address}
+											/>
+										</div>
+										<span className="text-sm text-muted-foreground">
+											{logo.companyName}
+										</span>
 									</div>
-									<span
-										className={
-											logo.address === address ? "font-medium text-primary" : ""
-										}
-									>
-										{logo.companyName}
-										{logo.address === address && " (You)"}
-									</span>
 								</div>
 								<div className="text-muted-foreground">
 									({logo.x + 1}, {logo.y + 1})
