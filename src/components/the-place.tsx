@@ -46,8 +46,8 @@ export function ThePlace() {
 		placeCompany,
 	} = useThePlaceContract();
 
-	// Dynamic grid size state - starts at 3x3, expands when filled
-	const [gridSize, setGridSize] = useState(3);
+	// Dynamic grid size state - starts at 5x5, expands when filled
+	const [gridSize, setGridSize] = useState(5);
 	const CELL_SIZE = 45; // Mobile-friendly size
 	const CANVAS_SIZE = gridSize * CELL_SIZE;
 	const MAX_GRID_SIZE = 10;
